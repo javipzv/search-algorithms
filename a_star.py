@@ -22,7 +22,7 @@ def heuristic_function(v1: Vertex, v2: Vertex, distance_type: str = "Euclidean")
     else:
         raise Exception("Not valid heuristic")
 
-def A_star(g: Graph, source: Vertex, destination: Vertex):
+def a_star(g: Graph, source: Vertex, destination: Vertex):
     # Declare structures
     distances: dict = {v: float(inf) for v in g.get_vertices()}
     seen: set = set()

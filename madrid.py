@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import time
 from graph import Graph, Vertex
 from dijkstra import dijkstra
-from a_star import A_star
+from a_star import a_star
 
 # Create my own graph
 my_g = Graph()
@@ -43,7 +43,7 @@ print(source, destination)
 print()
 a_star_start_time = time.perf_counter()
 
-print(A_star(my_g, source, destination))
+print(a_star(my_g, source, destination))
 
 a_star_end_time = time.perf_counter()
 
