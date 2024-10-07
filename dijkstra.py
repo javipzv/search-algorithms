@@ -17,7 +17,7 @@ def redo_path(destination: Vertex, parent_dict: dict):
 def dijkstra(g: Graph, source: Vertex, destination: Vertex):
     # Declare structures
     distances: dict = {v: float(inf) for v in g.get_vertices()}
-    seen: dict = {v: False for v in g.get_vertices()}
+    seen: set = set()
     parent_dict: dict = {v: None for v in g.get_vertices()}
     vertices_queue: list = []
 
@@ -33,11 +33,11 @@ def dijkstra(g: Graph, source: Vertex, destination: Vertex):
         if v == destination:
             break
         
-        seen[v] = True
+        seen.add(v)
         for neighbor, w in g.get_neighbors(v):
-            if not seen[neighbor]:
+            if neighbor not in seen:
                 new_distance: float = v_distance + w
-                if v_distance + w < distances[neighbor]:
+                if new_distance < distances[neighbor]:
                     distances[neighbor] = new_distance
                     parent_dict[neighbor] = v
                     heapq.heappush(vertices_queue, (distances[neighbor], neighbor))
@@ -46,7 +46,7 @@ def dijkstra(g: Graph, source: Vertex, destination: Vertex):
     if distances[destination] == float(inf):
         return "Not reached node"
     path = redo_path(destination, parent_dict)
-    return distances[destination], path
+    return distances[destination], len(path)
 
 # g = Graph()        
 

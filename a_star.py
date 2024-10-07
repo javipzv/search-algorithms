@@ -14,7 +14,7 @@ def redo_path(destination: Vertex, parent_dict: dict):
         parent = parent_dict[child]
     return path[::-1]
 
-def heuristic_function(v1: Vertex, v2: Vertex, distance_type: str = "Manhattan"):
+def heuristic_function(v1: Vertex, v2: Vertex, distance_type: str = "Euclidean"):
     if distance_type == "Euclidean":
         return np.sqrt((v1.latitude - v2.latitude)**2 + (v1.longitude - v2.longitude)**2)
     elif distance_type == "Manhattan":
@@ -25,7 +25,7 @@ def heuristic_function(v1: Vertex, v2: Vertex, distance_type: str = "Manhattan")
 def A_star(g: Graph, source: Vertex, destination: Vertex):
     # Declare structures
     distances: dict = {v: float(inf) for v in g.get_vertices()}
-    seen: dict = {v: False for v in g.get_vertices()}
+    seen: set = set()
     parent_dict: dict = {v: None for v in g.get_vertices()}
     vertices_queue: list = []
 
@@ -41,19 +41,19 @@ def A_star(g: Graph, source: Vertex, destination: Vertex):
         if v == destination:
             break
         
-        seen[v] = True
+        seen.add(v)
         for neighbor, w in g.get_neighbors(v):
-            if not seen[neighbor]:
+            if neighbor not in seen:
                 new_distance: float = distances[v] + w
                 if new_distance < distances[neighbor]:
                     distances[neighbor] = new_distance
                     parent_dict[neighbor] = v
                     # Add the heuristic
-                    priority = new_distance + heuristic_function(neighbor, destination)
+                    priority: float = new_distance + heuristic_function(neighbor, destination)
                     heapq.heappush(vertices_queue, (priority, neighbor))
     
     # Return the solution
     if distances[destination] == float(inf):
         return "Not reached node"
     path = redo_path(destination, parent_dict)
-    return distances[destination], path
+    return distances[destination], len(path)
