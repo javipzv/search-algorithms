@@ -20,17 +20,21 @@ class Vertex:
 
 class Graph:
     def __init__(self, dirigido: bool = False):
-        self.graph : dict = {}
-        self.dirigido : bool = dirigido
+        self.graph: dict = {}
+        self.vertices: dict = {}
+        self.dirigido: bool = dirigido
 
     def add_vertex(self, v: Vertex):
         self.graph[v] = []
+        self.vertices[v.id] = v
 
     def add_edge(self, v1: Vertex, v2: Vertex, weight: int):
         if v1 not in self.graph:
             self.graph[v1] = []
+            self.vertices[v1.id] = v1
         if v2 not in self.graph:
             self.graph[v2] = []
+            self.vertices[v2.id] = v2
         self.graph[v1].append((v2, weight))
         if not self.dirigido:
             self.graph[v2].append((v1, weight))

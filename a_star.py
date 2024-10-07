@@ -14,7 +14,7 @@ def redo_path(destination: Vertex, parent_dict: dict):
         parent = parent_dict[child]
     return path[::-1]
 
-def heuristic_function(v1: Vertex, v2: Vertex, distance_type: str = "Euclidean"):
+def heuristic_function(v1: Vertex, v2: Vertex, distance_type: str = "Manhattan"):
     if distance_type == "Euclidean":
         return np.sqrt((v1.latitude - v2.latitude)**2 + (v1.longitude - v2.longitude)**2)
     elif distance_type == "Manhattan":
