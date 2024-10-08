@@ -70,7 +70,7 @@ class Graph:
         return [vertex for vertex, _ in self.graph.items()]
 
     def get_vertex_by_id(self, id):
-        return self.vertices[id]
+        return self.vertices[id] if id in self.vertices else None
 
     def get_neighbors(self, v1: Vertex) -> list:
         return self.graph[v1]

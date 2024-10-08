@@ -14,14 +14,17 @@ G = ox.load_graphml(filepath='grafo_madrid.graphml')
 # Load the nodes and add them to my graph
 nodes = G.nodes(data=True)
 for node_id, attributes in nodes:
-    v = Vertex(node_id, attributes['y'], attributes['x'])
-    my_g.add_vertex(v)
+    if attributes['y'] > 40.36 and attributes['y'] < 40.47 and attributes['x'] > -3.77 and attributes['x'] < -3.62:
+        v = Vertex(node_id, attributes['y'], attributes['x'])
+        my_g.add_vertex(v)
 
+print(my_g.get_number_of_vertex())
 # Load the edges and add them to my graph
 edges = G.edges(data=True)
 for u, v, attributes in edges:
-    v1, v2 = my_g.get_vertex_by_id(u), my_g.get_vertex_by_id(v)
-    my_g.add_edge(v1, v2, attributes['length'], attributes.get('geometry', ""))
+    if my_g.get_vertex_by_id(u) and my_g.get_vertex_by_id(v):
+        v1, v2 = my_g.get_vertex_by_id(u), my_g.get_vertex_by_id(v)
+        my_g.add_edge(v1, v2, attributes['length'], attributes.get('geometry', ""))
 
 # node_to_highlight = [list(G.nodes)[30000], list(G.nodes)[17000]]  # Ejemplo: primeros dos nodos
 # node_colors = ['red' if node in node_to_highlight else 'blue' for node in G.nodes()]
@@ -36,8 +39,8 @@ for u, v, attributes in edges:
 
 # my_g.show_graph()
 
-source = my_g.vertices[list(G.nodes)[0]]
-destination = my_g.vertices[list(G.nodes)[31000]]
+source = my_g.vertices[list(G.nodes)[7000]]
+destination = my_g.vertices[list(G.nodes)[18000]]
 
 print(source, destination)
 print()

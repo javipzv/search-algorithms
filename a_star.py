@@ -82,7 +82,6 @@ def a_star(g: Graph, source: Vertex, destination: Vertex):
                     distances[neighbor] = new_distance
                     parent_dict[neighbor] = v
                     # Add the heuristic
-                    print(new_distance, heuristic_function(neighbor, destination, distance_type="Euclidean", scale_factor=75000))
                     priority: float = new_distance + heuristic_function(neighbor, destination, distance_type="Euclidean", scale_factor=75000)
                     heapq.heappush(vertices_queue, (priority, neighbor))
     
@@ -91,29 +90,3 @@ def a_star(g: Graph, source: Vertex, destination: Vertex):
         return "Not reached node"
     path = redo_path(destination, parent_dict)
     return distances[destination], len(path)
-
-# g = Graph()
-
-# S = Vertex("S", 0, 0)
-# A = Vertex("A", 0, 0)
-# C = Vertex("C", 0, 0)
-# E = Vertex("E", 0, 0)
-# D = Vertex("D", 0, 0)
-# B = Vertex("B", 0, 0)
-# F = Vertex("F", 0, 0)
-# T = Vertex("T", 0, 0)
-
-# g.add_edge(S, A, 30, None)
-# g.add_edge(A, C, 5, None)
-# g.add_edge(A, E, 30, None)
-# g.add_edge(A, B, 40, None)
-# g.add_edge(C, D, 40, None)
-# g.add_edge(E, F, 65, None)
-# g.add_edge(D, B, 5, None)
-# g.add_edge(D, T, 35, None)
-# g.add_edge(B, T, 30, None)
-# g.add_edge(F, T, 40, None)
-
-# h_func = {"S": 90, "A": 65, "C": 70, "E": 100, "D": 25, "B": 20, "F": 20, "T": 0}
-
-# print(a_star(g, S, T))

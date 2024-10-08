@@ -6,7 +6,7 @@ from dijkstra import dijkstra
 from a_star import a_star
 
 # Load Madrid OSM
-G = ox.load_graphml(filepath='chicago.graphml')
+G = ox.load_graphml(filepath='grafo_madrid.graphml')
 
 # Inicializar las variables para almacenar los límites de latitud y longitud
 min_lat = float('inf')
