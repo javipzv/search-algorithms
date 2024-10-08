@@ -1,7 +1,7 @@
 import numpy as np
 import heapq
 from math import inf, radians, sin, cos, sqrt, atan2
-from graph import Graph, Vertex
+from graph.graph import Graph, Vertex
 
 def redo_path(destination: Vertex, parent_dict: dict):
     # Recreate the shortest path iterating over the parents
@@ -46,7 +46,7 @@ def heuristic_function(v1: Vertex, v2: Vertex, distance_type: str = "Euclidean",
 
 def a_star(g: Graph, source: Vertex, destination: Vertex):
     
-    with open("trace_astar.txt", "w") as file:
+    with open("traces/trace_astar.txt", "w") as file:
         file.write("")
 
     # Declare structures
@@ -67,7 +67,7 @@ def a_star(g: Graph, source: Vertex, destination: Vertex):
         if parent_dict[v]:
             v0 = parent_dict[v]
             edge = g.get_edge_by_vertices(v0, v)
-            with open("trace_astar.txt", "a") as file:
+            with open("traces/trace_astar.txt", "a") as file:
                 file.write(str(v0.latitude) + " " + str(v0.longitude) + " " + str(v.latitude) + " " + str(v.longitude) + " " + str(edge.linestring) + "\n")
 
         # If we reached the destination

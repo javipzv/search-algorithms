@@ -1,6 +1,7 @@
 import pygame
 import sys
 import regex as re
+import time
 
 def latitude_to_screen(latitude):
     return (40.36 - latitude) * 600 / (40.36 - 40.47)
@@ -27,7 +28,7 @@ calles_pintadas = (101,179,185)
 # Coordenada del punto (en el centro de la ventana)
 point_position = (width // 2, height // 2)
 
-with open('trace_astar.txt') as f:
+with open('traces/trace_dijkstra.txt') as f:
     content = f.readlines()
 
 i = 0
@@ -62,9 +63,7 @@ while running:
             path.append((longitude_to_screen(float(nodes[j])), latitude_to_screen(float(nodes[j+1]))))
         path.append((longitude_destination, latitude_destination))
     
-    # Dibujar el punto (grosor 5 píxeles)
-    # pygame.draw.circle(screen, black, (longitude_source, latitude_source), 1)
-    # pygame.draw.circle(screen, black, (longitude_destination, latitude_destination), 1)
+    # Dibujar el path (grosor 5 píxeles)
     pygame.draw.lines(screen, color=calles_pintadas, closed=True, points=path, width=1)
 
     # Actualizar la pantalla

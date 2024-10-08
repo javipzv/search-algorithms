@@ -1,15 +1,15 @@
 import osmnx as ox
 import matplotlib.pyplot as plt
 import time
-from graph import Graph, Vertex
-from dijkstra import dijkstra
-from a_star import a_star
+from graph.graph import Graph, Vertex
+from graph.algorithms.dijkstra import dijkstra
+from graph.algorithms.a_star import a_star
 
 # Create my own graph
 my_g = Graph()
 
 # Load Chicago graph
-G = ox.load_graphml(filepath='chicago.graphml')
+G = ox.load_graphml(filepath='graph_examples/chicago.graphml')
 
 # Load the nodes and add them to my graph
 nodes = G.nodes(data=True)

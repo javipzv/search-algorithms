@@ -1,9 +1,9 @@
 import osmnx as ox
 import matplotlib.pyplot as plt
 import time
-from graph import Graph, Vertex
-from dijkstra import dijkstra
-from a_star import a_star
+from graph.graph import Graph, Vertex
+from graph.algorithms.dijkstra import dijkstra
+from graph.algorithms.a_star import a_star
 
 # Load Madrid OSM
 G = ox.load_graphml(filepath='grafo_madrid.graphml')

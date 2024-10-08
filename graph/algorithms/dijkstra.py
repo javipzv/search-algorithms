@@ -1,7 +1,7 @@
 import numpy as np
 import heapq
 from math import inf
-from graph import Graph, Vertex
+from graph.graph import Graph, Vertex
 
 def redo_path(destination: Vertex, parent_dict: dict):
     # Recreate the shortest path iterating over the parents
@@ -15,7 +15,7 @@ def redo_path(destination: Vertex, parent_dict: dict):
     return path[::-1]
 
 def dijkstra(g: Graph, source: Vertex, destination: Vertex):
-    with open("trace.txt", "w") as file:
+    with open("traces/trace_dijkstra.txt", "w") as file:
         file.write("")
 
     # Declare structures
@@ -36,7 +36,7 @@ def dijkstra(g: Graph, source: Vertex, destination: Vertex):
         if parent_dict[v]:
             v0 = parent_dict[v]
             edge = g.get_edge_by_vertices(v0, v)
-            with open("trace.txt", "a") as file:
+            with open("traces/trace_dijkstra.txt", "a") as file:
                 file.write(str(v0.latitude) + " " + str(v0.longitude) + " " + str(v.latitude) + " " + str(v.longitude) + " " + str(edge.linestring) + "\n")
 
         # If we reached the destination
