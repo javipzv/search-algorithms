@@ -1,6 +1,9 @@
 import pygame
 from PIL import Image
 import pickle
+from constants import MADRID_LIMITS, CHICAGO_LIMITS
+from functions import cartesian_to_geo
+import numpy as np
 
 BLANCO = (255, 255, 255)
 NEGRO = (0, 0, 0)
@@ -8,6 +11,7 @@ COLOR_FONDO = (24, 24, 29)
 VERDE_OSCURO = (65, 84, 85)
 VERDE_BRILLANTE = (131, 179, 185)
 GRIS = (150, 150, 150)
+ROJO = (255, 0, 0)
 
 class PantallaBase:
     def __init__(self):
@@ -74,11 +78,14 @@ class PantallaVisualizacion(PantallaBase):
         super().__init__()
         self.jugando = True
         self.algorithm = None
+        self.mouse_pos_p1 = None
+        self.mouse_pos_p2 = None
         self.p1 = None
         self.p2 = None
         self.selecting_p1 = False
         self.selecting_p2 = False
         self.selected_city = None
+
         with open('maps/madrid_edges.pkl', 'rb') as archivo:
             self.madrid_edges = pickle.load(archivo)
         with open('maps/chicago_edges.pkl', 'rb') as archivo:
@@ -92,25 +99,62 @@ class PantallaVisualizacion(PantallaBase):
             if evento.type == pygame.MOUSEBUTTONDOWN:
                 mouse_pos = pygame.mouse.get_pos()
 
+                # Selecting p1
                 if self.selecting_p1 and mouse_pos[0] > 300 and mouse_pos[0] < 1000 and mouse_pos[1] > 0 and mouse_pos[1] < 600:
-                    print(mouse_pos)
+                    self.mouse_pos_p1 = mouse_pos
+                    if self.selected_city == "Madrid":
+                        self.p1 = cartesian_to_geo(mouse_pos[0], mouse_pos[1],
+                                                   MADRID_LIMITS[1][0], MADRID_LIMITS[1][1],
+                                                   MADRID_LIMITS[0][0], MADRID_LIMITS[0][1])
+                    elif self.selected_city == "Chicago":
+                        self.p1 = cartesian_to_geo(mouse_pos[0], mouse_pos[1],
+                                                   CHICAGO_LIMITS[1][0], CHICAGO_LIMITS[1][1],
+                                                   CHICAGO_LIMITS[0][0], CHICAGO_LIMITS[0][1])
                     self.selecting_p2 = True
                     self.selecting_p1 = False
 
+                # Selecting p2
                 elif self.selecting_p2 and mouse_pos[0] > 300 and mouse_pos[0] < 1000 and mouse_pos[1] > 0 and mouse_pos[1] < 600:
-                    print(mouse_pos)
+                    self.mouse_pos_p2 = mouse_pos
+                    if self.selected_city == "Madrid":
+                        self.p2 = cartesian_to_geo(mouse_pos[0], mouse_pos[1],
+                                                   MADRID_LIMITS[1][0], MADRID_LIMITS[1][1],
+                                                   MADRID_LIMITS[0][0], MADRID_LIMITS[0][1])
+                    elif self.selected_city == "Chicago":
+                        self.p2 = cartesian_to_geo(mouse_pos[0], mouse_pos[1],
+                                                   CHICAGO_LIMITS[1][0], CHICAGO_LIMITS[1][1],
+                                                   CHICAGO_LIMITS[0][0], CHICAGO_LIMITS[0][1])
                     self.selecting_p2 = False
 
+                # Botón para aplicar Dijkstra
+                elif mouse_pos[0] > 24 and mouse_pos[0] < 270 and mouse_pos[1] > 247 and mouse_pos[1] < 287:
+                    if self.p1 and self.p2:
+                        self.algorithm = "Dijkstra"
+                        self.calcular_camino()
+
+                # Botón para aplicar A*
+                elif mouse_pos[0] > 24 and mouse_pos[0] < 270 and mouse_pos[1] > 297 and mouse_pos[1] < 337:
+                    if self.p1 and self.p2:
+                        self.algorithm = "A*"
+                        self.calcular_camino()
+
+                # Going back
                 elif mouse_pos[0] > 27 and mouse_pos[0] < 267 and mouse_pos[1] > 530 and mouse_pos[1] < 565:
+                    self.p1, self.p2, self.mouse_pos_p1, self.mouse_pos_p2 = None, None, None, None
                     return "inicio"
                 
+                # Selecting points
                 elif mouse_pos[0] > 27 and mouse_pos[0] < 267 and mouse_pos[1] > 51 and mouse_pos[1] < 85:
                     self.selecting_p1 = True
         return None
 
     def actualizar(self):
-        # Aquí va la lógica del juego
-        pass
+        if self.p1:
+            pygame.draw.circle(pantalla, ROJO, self.mouse_pos_p1, 3)
+            self.dibujar_texto(text=str((np.round(self.p1[0], 3), np.round(self.p1[1], 3))), font=self.bigger_text_font, color=COLOR_FONDO, pos=(100, 110))
+        if self.p2:
+            pygame.draw.circle(pantalla, ROJO, self.mouse_pos_p2, 3)
+            self.dibujar_texto(text=str((np.round(self.p2[0], 3), np.round(self.p2[1], 3))), font=self.bigger_text_font, color=COLOR_FONDO, pos=(100, 160))
 
     def dibujar_mapa(self):
         if self.selected_city == "Madrid":
@@ -197,11 +241,11 @@ while corriendo:
     # Manejar eventos de la pantalla actual
     controlador_pantallas.manejar_eventos(eventos)
 
-    # Actualizar lógica de la pantalla actual
-    controlador_pantallas.actualizar()
-
     # Dibujar la pantalla actual
     controlador_pantallas.dibujar(pantalla)
+
+    # Actualizar lógica de la pantalla actual
+    controlador_pantallas.actualizar()
 
     # Actualizar la pantalla
     pygame.display.flip()

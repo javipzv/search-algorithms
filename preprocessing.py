@@ -2,15 +2,8 @@ import osmnx as ox
 import pickle
 import re
 from graph.graph import Graph, Vertex
-
-SCREEN_WIDTH = 700
-SCREEN_HEIGHT = 600
-SHIFT = 300
-
-def resize_points(lon, lat, min_lat, max_lat, min_lon, max_lon):
-    x = (min_lon - lon) * (SCREEN_WIDTH) / (min_lon - max_lon)
-    y = (max_lat - lat) * (SCREEN_HEIGHT) / (max_lat - min_lat)
-    return SHIFT + x, y 
+from constants import MADRID_LIMITS, CHICAGO_LIMITS, SCREEN_HEIGHT, SCREEN_WIDTH, SHIFT
+from functions import geo_to_cartesian
 
 def get_edges(graph_path, min_limit_lat, max_limit_lat, min_limin_lon, max_limit_lon):
     my_G = Graph()
@@ -53,13 +46,18 @@ def get_edges(graph_path, min_limit_lat, max_limit_lat, min_limin_lon, max_limit
                 pts = pts + coords_linestring_to_float
 
             pts.append((v2.longitude, v2.latitude))
-            pts_resized = [resize_points(lon=lon, lat=lat, min_lat=min_lat, max_lat=max_lat, min_lon=min_lon, max_lon=max_lon) for lon, lat in pts]
+            pts_resized = [geo_to_cartesian(lon=lon, lat=lat, min_lat=min_lat, max_lat=max_lat, min_lon=min_lon, max_lon=max_lon) for lon, lat in pts]
             transformed_edges.append(pts_resized)
 
     return transformed_edges
 
-madrid_edges = get_edges(graph_path='graph_examples/madrid.graphml', min_limit_lat=40.332, max_limit_lat=40.531, min_limin_lon=-3.783, max_limit_lon=-3.598)
-chicago_edges = get_edges(graph_path='graph_examples/chicago.graphml', min_limit_lat=41.740, max_limit_lat=42.034, min_limin_lon=-87.91, max_limit_lon=-87.535)
+madrid_edges = get_edges(graph_path='graph_examples/madrid.graphml', 
+                         min_limit_lat=MADRID_LIMITS[1][0], max_limit_lat=MADRID_LIMITS[1][1], 
+                         min_limin_lon=MADRID_LIMITS[0][0], max_limit_lon=MADRID_LIMITS[0][1])
+
+chicago_edges = get_edges(graph_path='graph_examples/chicago.graphml', 
+                          min_limit_lat=CHICAGO_LIMITS[1][0], max_limit_lat=CHICAGO_LIMITS[1][1], 
+                          min_limin_lon=CHICAGO_LIMITS[0][0], max_limit_lon=CHICAGO_LIMITS[0][1])
 
 with open('maps/madrid_edges.pkl', 'wb') as file:
     pickle.dump(madrid_edges, file)
