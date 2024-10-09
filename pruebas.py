@@ -1,12 +1,10 @@
 import osmnx as ox
-import matplotlib.pyplot as plt
-import time
 from graph.graph import Graph, Vertex
 from graph.algorithms.dijkstra import dijkstra
 from graph.algorithms.a_star import a_star
 
 # Load Madrid OSM
-G = ox.load_graphml(filepath='grafo_madrid.graphml')
+G = ox.load_graphml(filepath='graph_examples/chicago.graphml')
 
 # Inicializar las variables para almacenar los límites de latitud y longitud
 min_lat = float('inf')

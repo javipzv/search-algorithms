@@ -9,12 +9,12 @@ from graph.algorithms.a_star import a_star
 my_g = Graph()
 
 # Load Madrid OSM
-G = ox.load_graphml(filepath='graph_examples/grafo_madrid.graphml')
+G = ox.load_graphml(filepath='graph_examples/madrid.graphml')
 
 # Load the nodes and add them to my graph
 nodes = G.nodes(data=True)
 for node_id, attributes in nodes:
-    if attributes['y'] > 40.36 and attributes['y'] < 40.47 and attributes['x'] > -3.77 and attributes['x'] < -3.62:
+    if attributes['y'] > 40.36 and attributes['y'] < 40.50 and attributes['x'] > -3.79 and attributes['x'] < -3.55:
         v = Vertex(node_id, attributes['y'], attributes['x'])
         my_g.add_vertex(v)
 

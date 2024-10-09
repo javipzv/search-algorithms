@@ -1,19 +1,18 @@
 import pygame
 import sys
 import regex as re
-import time
 
 def latitude_to_screen(latitude):
-    return (40.36 - latitude) * 600 / (40.36 - 40.47)
+    return 600 - ((40.36 - latitude) * 600 / (40.36 - 40.50))
 
 def longitude_to_screen(longitude):
-    return (-3.62 - longitude) * 700 / (-3.62 + 3.77)
+    return 800 - ((-3.55 - longitude) * 800 / (-3.55 + 3.79))
 
 # Inicializar pygame
 pygame.init()
 
 # Definir dimensiones de la ventana
-width, height = 710, 610
+width, height = 800, 600
 screen = pygame.display.set_mode((width, height))
 
 # Definir color (RGB)
@@ -22,13 +21,13 @@ black = (0, 0, 0)
 red = (255, 0, 0)
 red2 = (37, 0, 0)
 fondo = (24, 24, 29)
-calles = (65,84,85)
-calles_pintadas = (101,179,185)
+calles = (65, 84, 85)
+calles_pintadas = (101, 179, 185)
 
 # Coordenada del punto (en el centro de la ventana)
 point_position = (width // 2, height // 2)
 
-with open('traces/trace_dijkstra.txt') as f:
+with open('traces/trace_astar.txt') as f:
     content = f.readlines()
 
 i = 0
