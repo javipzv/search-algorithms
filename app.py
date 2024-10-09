@@ -93,6 +93,8 @@ class PantallaVisualizacion(PantallaBase):
         self.trace = None
         self.p1_nearest = None
         self.p2_nearest = None
+        self.index = 0
+        self.visited_edges = []
 
         with open('maps/madrid_edges.pkl', 'rb') as archivo:
             self.madrid_edges = pickle.load(archivo)
@@ -154,12 +156,13 @@ class PantallaVisualizacion(PantallaBase):
                 elif mouse_pos[0] > 24 and mouse_pos[0] < 270 and mouse_pos[1] > 297 and mouse_pos[1] < 337:
                     if self.p1 and self.p2:
                         self.algorithm = "A*"
-                        self.calcular_camino()
+                        dist, path, trace = self.calcular_camino()
+                        self.trace = trace
                         self.path_calculated = True
 
                 # Going back
                 elif mouse_pos[0] > 27 and mouse_pos[0] < 267 and mouse_pos[1] > 530 and mouse_pos[1] < 565:
-                    self.p1, self.p2, self.mouse_pos_p1, self.mouse_pos_p2, self.selected_city, self.selected_graph = None, None, None, None, None, None
+                    self.p1, self.p2, self.mouse_pos_p1, self.mouse_pos_p2, self.selected_city, self.selected_graph, self.index = None, None, None, None, None, None, 0
                     return "inicio"
                 
                 # Selecting points
@@ -168,44 +171,35 @@ class PantallaVisualizacion(PantallaBase):
         return None
 
     def actualizar(self):
-        # Dibujar el punto P1
         if self.p1:
             pygame.draw.circle(pantalla, ROJO, self.mouse_pos_p1, 3)
             self.dibujar_texto(text=str((np.round(self.p1[0], 3), np.round(self.p1[1], 3))), font=self.bigger_text_font, color=COLOR_FONDO, pos=(100, 110))
 
-        # Dibujar el punto P2
+        if self.p1_nearest:
+            pygame.draw.circle(pantalla, BLANCO, self.p1_nearest, 3)
+        
         if self.p2:
             pygame.draw.circle(pantalla, ROJO, self.mouse_pos_p2, 3)
             self.dibujar_texto(text=str((np.round(self.p2[0], 3), np.round(self.p2[1], 3))), font=self.bigger_text_font, color=COLOR_FONDO, pos=(100, 160))
-
-        # Dibujar los puntos más cercanos al nodo
-        if self.p1_nearest:
-            pygame.draw.circle(pantalla, BLANCO, self.p1_nearest, 3)
         
         if self.p2_nearest:
             pygame.draw.circle(pantalla, BLANCO, self.p2_nearest, 3)
 
-        # Dibujar la traza poco a poco
-        if self.path_calculated and self.trace:
-            current_time = pygame.time.get_ticks()  # Obtener el tiempo actual de pygame
+        if self.path_calculated:
+            if self.selected_city == "Madrid":
+                tr = [geo_to_cartesian(lon, lat, MADRID_LIMITS[1][0], MADRID_LIMITS[1][1], 
+                                                      MADRID_LIMITS[0][0], MADRID_LIMITS[0][1]) for lon, lat in self.trace[self.index]]
+                self.visited_edges.append(tr)
+                for edge in self.visited_edges:
+                    pygame.draw.lines(pantalla, color=VERDE_BRILLANTE, closed=True, points=edge, width=2)
 
-            # Dibujar la traza poco a poco con un intervalo de 100 ms
-            if current_time - self.trace_timer > 0.00000001:
-                if self.current_trace_index < len(self.trace):
-                    if self.selected_city == "Madrid":
-                        t = self.trace[self.current_trace_index]
-                        t_transformed = [geo_to_cartesian(lon, lat, MADRID_LIMITS[1][0], MADRID_LIMITS[1][1], 
-                                                        MADRID_LIMITS[0][0], MADRID_LIMITS[0][1]) for lon, lat in t]
-                        pygame.draw.lines(pantalla, color=VERDE_BRILLANTE, closed=False, points=t_transformed, width=3)
-
-                    elif self.selected_city == "Chicago":
-                        t = self.trace[self.current_trace_index]
-                        t_transformed = [geo_to_cartesian(lon, lat, CHICAGO_LIMITS[1][0], CHICAGO_LIMITS[1][1], 
-                                                        CHICAGO_LIMITS[0][0], CHICAGO_LIMITS[0][1]) for lon, lat in t]
-                        pygame.draw.lines(pantalla, color=VERDE_BRILLANTE, closed=False, points=t_transformed, width=3)
-                    
-                    self.current_trace_index += 1
-                    self.trace_timer = current_time
+            elif self.selected_city == "Chicago":
+                for t in self.trace:
+                    t_transformed = [geo_to_cartesian(lon, lat, CHICAGO_LIMITS[1][0], CHICAGO_LIMITS[1][1], 
+                                                      CHICAGO_LIMITS[0][0], CHICAGO_LIMITS[0][1]) for lon, lat in t]
+                    pygame.draw.lines(pantalla, color=VERDE_BRILLANTE, closed=True, points=t_transformed, width=2)
+        
+        self.index += 1
 
     def dibujar_mapa(self):
         if self.selected_city == "Madrid":
@@ -247,24 +241,20 @@ class PantallaVisualizacion(PantallaBase):
     
     def calcular_camino(self):
         source_node = get_nearest_node(self.selected_graph, self.p1[0], self.p1[1])
-        source_node_cart = geo_to_cartesian(source_node.longitude, source_node.latitude, MADRID_LIMITS[1][0], MADRID_LIMITS[1][1], 
-                                            MADRID_LIMITS[0][0], MADRID_LIMITS[0][1])
-        self.p1_nearest = source_node_cart
+        # source_node_cart = geo_to_cartesian(source_node.longitude, source_node.latitude, MADRID_LIMITS[1][0], MADRID_LIMITS[1][1], 
+        #                                     MADRID_LIMITS[0][0], MADRID_LIMITS[0][1])
+        # self.p1_nearest = source_node_cart
 
         destination_node = get_nearest_node(self.selected_graph, self.p2[0], self.p2[1])
-        destination_node_cart = geo_to_cartesian(destination_node.longitude, destination_node.latitude, MADRID_LIMITS[1][0], MADRID_LIMITS[1][1], 
-                                            MADRID_LIMITS[0][0], MADRID_LIMITS[0][1])
-        self.p2_nearest = destination_node_cart
+        # destination_node_cart = geo_to_cartesian(destination_node.longitude, destination_node.latitude, MADRID_LIMITS[1][0], MADRID_LIMITS[1][1], 
+        #                                     MADRID_LIMITS[0][0], MADRID_LIMITS[0][1])
+        # self.p2_nearest = destination_node_cart
         
         if self.algorithm == "Dijkstra":
             dist, path, trace = dijkstra(self.selected_graph, source_node, destination_node)
         elif self.algorithm == "A*":
+            print(source_node, destination_node)
             dist, path, trace = a_star(self.selected_graph, source_node, destination_node)
-        
-        # Guardar la traza
-        self.trace = trace
-        self.current_trace_index = 0  # Nuevo índice para ir mostrando los segmentos de la traza
-        self.trace_timer = pygame.time.get_ticks()  # Usar el tiempo de pygame para controlar el dibujo
         return dist, path, trace
 
 class ControladorPantallas:

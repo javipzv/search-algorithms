@@ -2,6 +2,7 @@ import numpy as np
 import heapq
 from math import inf, radians, sin, cos, sqrt, atan2
 from graph.graph import Graph, Vertex
+import regex as re
 
 def redo_path(destination: Vertex, parent_dict: dict):
     # Recreate the shortest path iterating over the parents
@@ -46,8 +47,9 @@ def heuristic_function(v1: Vertex, v2: Vertex, distance_type: str = "Euclidean",
 
 def a_star(g: Graph, source: Vertex, destination: Vertex):
     
-    with open("traces/trace_astar.txt", "w") as file:
-        file.write("")
+    # with open("traces/trace_astar.txt", "w") as file:
+    #     file.write("")
+    trace = []
 
     # Declare structures
     distances: dict = {v: float(inf) for v in g.get_vertices()}
@@ -64,11 +66,18 @@ def a_star(g: Graph, source: Vertex, destination: Vertex):
         _, v = heapq.heappop(vertices_queue)
 
         # Data for painting
+        # if parent_dict[v]:
+        #     v0 = parent_dict[v]
+        #     edge = g.get_edge_by_vertices(v0, v)
+        #     with open("traces/trace_astar.txt", "a") as file:
+        #         file.write(str(v0.latitude) + " " + str(v0.longitude) + " " + str(v.latitude) + " " + str(v.longitude) + " " + str(edge.linestring) + "\n")
         if parent_dict[v]:
             v0 = parent_dict[v]
             edge = g.get_edge_by_vertices(v0, v)
-            with open("traces/trace_astar.txt", "a") as file:
-                file.write(str(v0.latitude) + " " + str(v0.longitude) + " " + str(v.latitude) + " " + str(v.longitude) + " " + str(edge.linestring) + "\n")
+            linestring = re.findall("(-?\d{1,2}\.\d*) (-?\d{1,2}\.\d*)", str(edge.linestring))
+            linestring_float = [(float(a), float(b)) for a, b in linestring]
+            p = [(v0.longitude, v0.latitude)] + linestring_float + [(v.longitude, v.latitude)]
+            trace.append(p)
 
         # If we reached the destination
         if v == destination:
@@ -89,4 +98,4 @@ def a_star(g: Graph, source: Vertex, destination: Vertex):
     if distances[destination] == float(inf):
         return "Not reached node"
     path = redo_path(destination, parent_dict)
-    return distances[destination], path
+    return distances[destination], path, trace
