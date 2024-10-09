@@ -89,4 +89,4 @@ def a_star(g: Graph, source: Vertex, destination: Vertex):
     if distances[destination] == float(inf):
         return "Not reached node"
     path = redo_path(destination, parent_dict)
-    return distances[destination], len(path)
+    return distances[destination], path

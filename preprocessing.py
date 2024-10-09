@@ -37,6 +37,7 @@ def get_edges(graph_path, min_limit_lat, max_limit_lat, min_limin_lon, max_limit
         if my_G.get_vertex_by_id(u) and my_G.get_vertex_by_id(v):
             pts = []
             v1, v2 = my_G.get_vertex_by_id(u), my_G.get_vertex_by_id(v)
+            my_G.add_edge(v1, v2, attributes['length'], attributes.get('geometry', ""))
             pts.append((v1.longitude, v1.latitude))
 
             linestring = attributes.get('geometry', '')
@@ -49,13 +50,13 @@ def get_edges(graph_path, min_limit_lat, max_limit_lat, min_limin_lon, max_limit
             pts_resized = [geo_to_cartesian(lon=lon, lat=lat, min_lat=min_lat, max_lat=max_lat, min_lon=min_lon, max_lon=max_lon) for lon, lat in pts]
             transformed_edges.append(pts_resized)
 
-    return transformed_edges
+    return transformed_edges, my_G
 
-madrid_edges = get_edges(graph_path='graph_examples/madrid.graphml', 
+madrid_edges, madrid_graph = get_edges(graph_path='graph_examples/madrid.graphml', 
                          min_limit_lat=MADRID_LIMITS[1][0], max_limit_lat=MADRID_LIMITS[1][1], 
                          min_limin_lon=MADRID_LIMITS[0][0], max_limit_lon=MADRID_LIMITS[0][1])
 
-chicago_edges = get_edges(graph_path='graph_examples/chicago.graphml', 
+chicago_edges, chicago_graph = get_edges(graph_path='graph_examples/chicago.graphml', 
                           min_limit_lat=CHICAGO_LIMITS[1][0], max_limit_lat=CHICAGO_LIMITS[1][1], 
                           min_limin_lon=CHICAGO_LIMITS[0][0], max_limit_lon=CHICAGO_LIMITS[0][1])
 
@@ -64,3 +65,9 @@ with open('maps/madrid_edges.pkl', 'wb') as file:
 
 with open('maps/chicago_edges.pkl', 'wb') as file:
     pickle.dump(chicago_edges, file)
+
+with open('maps/madrid_graph.pkl', 'wb') as file:
+    pickle.dump(madrid_graph, file)
+
+with open('maps/chicago_graph.pkl', 'wb') as file:
+    pickle.dump(chicago_graph, file)
