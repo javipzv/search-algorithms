@@ -44,16 +44,16 @@ def load_graph_edges_and_vertices(graph_filepath, lat_min_limit, lat_max_limit, 
             custom_graph.add_edge(vertex_u, vertex_v, attributes['length'], edge_geometry)
             
             # Process the edge's geometry if available
-            edge_path = [(vertex_u.longitude, vertex_u.latitude)]
+            edge_path = [(vertex_u.latitude, vertex_u.longitude)]
             if edge_geometry:
                 line_coords = re.findall(r"(-?\d{1,2}\.\d*) (-?\d{1,2}\.\d*)", str(edge_geometry))
-                coords_float = [(float(lon), float(lat)) for lon, lat in line_coords]
+                coords_float = [(float(lat), float(lon)) for lon, lat in line_coords]
                 edge_path.extend(coords_float)
             
-            edge_path.append((vertex_v.longitude, vertex_v.latitude))
+            edge_path.append((vertex_v.latitude, vertex_v.longitude))
             
             # Convert geographic coordinates to Cartesian
-            transformed_edge = [geo_to_cartesian(lon, lat, min_lat=min_lat, max_lat=max_lat, min_lon=min_lon, max_lon=max_lon) for lon, lat in edge_path]
+            transformed_edge = [geo_to_cartesian(lat, lon, min_lat=min_lat, max_lat=max_lat, min_lon=min_lon, max_lon=max_lon) for lat, lon in edge_path]
             transformed_edges.append(transformed_edge)
 
     return transformed_edges, custom_graph
@@ -61,15 +61,15 @@ def load_graph_edges_and_vertices(graph_filepath, lat_min_limit, lat_max_limit, 
 # Process Madrid graph
 madrid_edges, madrid_graph = load_graph_edges_and_vertices(
     graph_filepath='graph/graph_examples/madrid.graphml',
-    lat_min_limit=MADRID_LIMITS[1][0], lat_max_limit=MADRID_LIMITS[1][1], 
-    lon_min_limit=MADRID_LIMITS[0][0], lon_max_limit=MADRID_LIMITS[0][1]
+    lat_min_limit=MADRID_LIMITS[0][0], lat_max_limit=MADRID_LIMITS[0][1], 
+    lon_min_limit=MADRID_LIMITS[1][0], lon_max_limit=MADRID_LIMITS[1][1]
 )
 
 # Process Barcelona graph
 barcelona_edges, barcelona_graph = load_graph_edges_and_vertices(
     graph_filepath='graph/graph_examples/barcelona.graphml',
-    lat_min_limit=BARCELONA_LIMITS[1][0], lat_max_limit=BARCELONA_LIMITS[1][1], 
-    lon_min_limit=BARCELONA_LIMITS[0][0], lon_max_limit=BARCELONA_LIMITS[0][1]
+    lat_min_limit=BARCELONA_LIMITS[0][0], lat_max_limit=BARCELONA_LIMITS[0][1], 
+    lon_min_limit=BARCELONA_LIMITS[1][0], lon_max_limit=BARCELONA_LIMITS[1][1]
 )
 
 # Save the results for Madrid

@@ -29,8 +29,8 @@ def dijkstra(g: Graph, start_vertex: Vertex, end_vertex: Vertex):
             parent_vertex = parent[current_vertex]
             edge = g.get_edge_by_vertices(parent_vertex, current_vertex)
             edge_path = re.findall(r"(-?\d{1,2}\.\d*) (-?\d{1,2}\.\d*)", str(edge.linestring))
-            edge_path_floats = [(float(lon), float(lat)) for lon, lat in edge_path]
-            full_edge_path = [(parent_vertex.longitude, parent_vertex.latitude)] + edge_path_floats + [(current_vertex.longitude, current_vertex.latitude)]
+            edge_path_floats = [(float(lat), float(lon)) for lon, lat in edge_path]
+            full_edge_path = [(parent_vertex.latitude, parent_vertex.longitude)] + edge_path_floats + [(current_vertex.latitude, current_vertex.longitude)]
             search_trace.append(full_edge_path)
 
         # If we reached the destination, stop the search

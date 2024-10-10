@@ -9,9 +9,9 @@ def cartesian_to_geo(x, y, min_lat, max_lat, min_lon, max_lon) -> tuple:
     """
     lon = -(-min_lon + ((min_lon - max_lon) * x / SCREEN_WIDTH))
     lat = max_lat - ((max_lat - min_lat) * y / SCREEN_HEIGHT)
-    return lon, lat
+    return lat, lon
 
-def geo_to_cartesian(lon, lat, min_lat, max_lat, min_lon, max_lon) -> tuple:
+def geo_to_cartesian(lat, lon, min_lat, max_lat, min_lon, max_lon) -> tuple:
     """
     Transform geographic coordinates to Cartesian coordinates
     """
@@ -25,7 +25,7 @@ def euclidian_distance(lat1, lon1, lat2, lon2) -> float:
     """
     return math.sqrt((lat1 - lat2)**2 + (lon1 - lon2)**2)
 
-def get_nearest_node(graph, lon, lat) -> Vertex:
+def get_nearest_node(graph, lat, lon) -> Vertex:
     """
     Get the nearest node to a given point selected by the user
     """
@@ -62,9 +62,9 @@ def transform_final_path(city_limits: list, graph: Graph, path: list[Vertex]):
         edge = graph.get_edge_by_vertices(path[i], path[i + 1])
         if edge:
             line_coords = re.findall(r"(-?\d{1,2}\.\d*) (-?\d{1,2}\.\d*)", str(edge.linestring))
-            coords_float = [(float(lon), float(lat)) for lon, lat in line_coords]
+            coords_float = [(float(lat), float(lon)) for lon, lat in line_coords]
             transformed_path.extend(coords_float)
 
-    transformed_path_to_cartesian = [geo_to_cartesian(lon, lat, min_lat=city_limits[1][0], max_lat=city_limits[1][1], 
-                                                      min_lon=city_limits[0][0], max_lon=city_limits[0][1]) for lon, lat in transformed_path]
+    transformed_path_to_cartesian = [geo_to_cartesian(lat, lon, min_lat=city_limits[0][0], max_lat=city_limits[0][1], 
+                                                      min_lon=city_limits[1][0], max_lon=city_limits[1][1]) for lat, lon in transformed_path]
     return transformed_path_to_cartesian

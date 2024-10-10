@@ -79,8 +79,8 @@ def a_star(g: Graph, start_vertex: Vertex, end_vertex: Vertex):
             parent_vertex = parent[current_vertex]
             edge = g.get_edge_by_vertices(parent_vertex, current_vertex)
             linestring = re.findall(r"(-?\d{1,2}\.\d*) (-?\d{1,2}\.\d*)", str(edge.linestring))
-            linestring_floats = [(float(lon), float(lat)) for lon, lat in linestring]
-            full_edge_path = [(parent_vertex.longitude, parent_vertex.latitude)] + linestring_floats + [(current_vertex.longitude, current_vertex.latitude)]
+            linestring_floats = [(float(lat), float(lon)) for lon, lat in linestring]
+            full_edge_path = [(parent_vertex.latitude, parent_vertex.longitude)] + linestring_floats + [(current_vertex.latitude, current_vertex.longitude)]
             search_trace.append(full_edge_path)
 
         # If we reached the destination
