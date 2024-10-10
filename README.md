@@ -1,6 +1,6 @@
 ## Search Algorithms (Dijkstra and A*)
 
-This project includes an interactive visualization application for two of the most well-known pathfinding algorithms: Dijkstra and A*. The repository also contains the implementation of the graph class, and real city graphs have been loaded using the OpenStreetMap library. Through this visualization, you can discover the key differences between the two algorithms, particularly how they select the nodes to visit.
+This project includes an interactive visualization application for two of the most well-known pathfinding algorithms: Dijkstra and A*. The repository contains the implementation of both algorithms, along with the graph class, and real city graphs are loaded using the OpenStreetMap library. For the user interface and visualization, the pygame library is used. Through the visualization, you can explore the key differences between the algorithms, especially in how they select nodes to visit.
 
 ### Features
 - City Selection: Choose between Madrid or Barcelona.
