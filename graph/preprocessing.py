@@ -2,8 +2,8 @@ import osmnx as ox
 import pickle
 import re
 from graph.graph import Graph, Vertex
-from constants import MADRID_LIMITS, CHICAGO_LIMITS, SCREEN_HEIGHT, SCREEN_WIDTH, SHIFT
-from functions import geo_to_cartesian
+from utils.constants import MADRID_LIMITS, CHICAGO_LIMITS, SCREEN_HEIGHT, SCREEN_WIDTH, SHIFT
+from utils.helpers import geo_to_cartesian
 
 def get_edges(graph_path, min_limit_lat, max_limit_lat, min_limin_lon, max_limit_lon):
     my_G = Graph()

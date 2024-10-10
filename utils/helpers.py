@@ -1,4 +1,4 @@
-from constants import SCREEN_HEIGHT, SCREEN_WIDTH, SHIFT
+from utils.constants import SCREEN_HEIGHT, SCREEN_WIDTH, SHIFT
 import math
 import pickle
 
@@ -26,6 +26,3 @@ def get_nearest_node(graph, lon, lat):
             min_dist = dist
             nodo_cercano = v
     return nodo_cercano
-
-with open('maps/madrid_graph.pkl', 'rb') as archivo:
-    madrid_graph = pickle.load(archivo)

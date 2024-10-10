@@ -1,4 +1,7 @@
 class Vertex:
+    """
+    
+    """
     def __init__(self, id: str, latitude: float, longitude: float) -> None:
         self.id: str = id
         self.latitude: float = latitude
@@ -77,7 +80,3 @@ class Graph:
     
     def get_number_of_vertex(self) -> int:
         return len(self.graph)
-    
-    def show_graph(self):
-        for v, neighbors in self.graph.items():
-            print(f"{v}: {neighbors}")

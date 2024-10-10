@@ -1,8 +1,8 @@
 import pygame
 from PIL import Image
 import pickle
-from constants import MADRID_LIMITS, CHICAGO_LIMITS, SHIFT
-from functions import cartesian_to_geo, geo_to_cartesian, get_nearest_node
+from utils.constants import MADRID_LIMITS, CHICAGO_LIMITS, SHIFT
+from utils.helpers import cartesian_to_geo, geo_to_cartesian, get_nearest_node
 import numpy as np
 from graph.algorithms.dijkstra import dijkstra
 from graph.algorithms.a_star import a_star
@@ -69,8 +69,8 @@ class PantallaInicio(PantallaBase):
         self.dibujar_texto(text="Discover the most common search algorithms with a visualization!", font=self.subtitle_font, color=VERDE_BRILLANTE, pos=(165, 210))
         self.dibujar_texto(text="Pick a city", font=self.subtitle_font, color=VERDE_BRILLANTE, pos=(450, 260))
 
-        self.dibujar_imagen(path='images/CHICAGO.jpg', shape=(255, 170), pos=(180, 330))
-        self.dibujar_imagen(path='images/MADRID.jpg', shape=(255, 170), pos=(580, 330))
+        self.dibujar_imagen(path='static/CHICAGO.jpg', shape=(255, 170), pos=(180, 330))
+        self.dibujar_imagen(path='static/MADRID.jpg', shape=(255, 170), pos=(580, 330))
 
         self.dibujar_texto(text="Chicago", font=self.text_font, color=VERDE_BRILLANTE, pos=(280, 510))
         self.dibujar_texto(text="Madrid", font=self.text_font, color=VERDE_BRILLANTE, pos=(680, 510))
@@ -97,14 +97,14 @@ class PantallaVisualizacion(PantallaBase):
     def set_selected_city(self, city):
         self.selected_city = city
         if city == "Madrid":
-            with open('maps/madrid_edges.pkl', 'rb') as archivo:
+            with open('graphs_data/madrid_edges.pkl', 'rb') as archivo:
                 self.madrid_edges = pickle.load(archivo)
-            with open('maps/madrid_graph.pkl', 'rb') as archivo:
+            with open('graphs_data/madrid_graph.pkl', 'rb') as archivo:
                 self.selected_graph = pickle.load(archivo)
         elif city == "Chicago":
-            with open('maps/chicago_edges.pkl', 'rb') as archivo:
+            with open('graphs_data/chicago_edges.pkl', 'rb') as archivo:
                 self.chicago_edges = pickle.load(archivo)
-            with open('maps/chicago_graph.pkl', 'rb') as archivo:
+            with open('graphs_data/chicago_graph.pkl', 'rb') as archivo:
                 self.selected_graph = pickle.load(archivo)
 
     def manejar_eventos(self, eventos):
