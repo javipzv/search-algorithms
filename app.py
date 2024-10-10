@@ -1,82 +1,79 @@
 import pygame
 from PIL import Image
 import pickle
-from utils.constants import MADRID_LIMITS, CHICAGO_LIMITS, SHIFT
+from utils.constants import MADRID_LIMITS, BARCELONA_LIMITS, SHIFT
 from utils.helpers import cartesian_to_geo, geo_to_cartesian, get_nearest_node, transform_final_path
 import numpy as np
 from graph.algorithms.dijkstra import dijkstra
 from graph.algorithms.a_star import a_star
 
-BLANCO = (255, 255, 255)
-NEGRO = (0, 0, 0)
-COLOR_FONDO = (24, 24, 29)
-VERDE_OSCURO = (65, 84, 85)
-VERDE_BRILLANTE = (131, 179, 185)
-GRIS = (150, 150, 150)
-ROJO = (255, 0, 0)
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
+GREEN_BACKGROUND = (24, 24, 29)
+DARK_GREEN = (65, 84, 85)
+LIGHT_GREEN = (131, 179, 185)
+GRAY = (150, 150, 150)
+RED = (255, 0, 0)
 YELLOW = (255, 219, 77)
 
-class PantallaBase:
+class BaseScreen:
     def __init__(self):
         self.title_font = pygame.font.Font(None, 80)
         self.subtitle_font = pygame.font.Font(None, 30)
         self.bigger_text_font = pygame.font.Font(None, 25)
         self.text_font = pygame.font.Font(None, 23)
 
-    def manejar_eventos(self, eventos):
-        """Manejar eventos como pulsaciones de teclas o clicks."""
+    def handle_events(self, events):
         pass
 
-    def actualizar(self):
-        """Actualizar la lógica de la pantalla."""
+    def update(self):
         pass
 
-    def dibujar(self, pantalla):
-        """Dibujar los elementos de la pantalla."""
+    def draw(self, screen):
         pass
 
-    def dibujar_imagen(self, path, shape, pos):
+    def draw_image(self, path, shape, pos):
         img = Image.open(path)
         img_redim = img.resize(shape, Image.Resampling.LANCZOS)
         img_redim_pg = pygame.image.fromstring(img_redim.tobytes(), img_redim.size, img_redim.mode)
-        pantalla.blit(img_redim_pg, pos)
+        screen.blit(img_redim_pg, pos)
 
-    def dibujar_texto(self, text, font, color, pos):
+    def draw_text(self, text, font, color, pos):
         text_to_draw = font.render(text, True, color)
-        pantalla.blit(text_to_draw, pos)
+        screen.blit(text_to_draw, pos)
 
-class PantallaInicio(PantallaBase):
+class InitialScreen(BaseScreen):
     def __init__(self):
         super().__init__()
         self.selected_city = None
 
-    def manejar_eventos(self, eventos):
-        for evento in eventos:
-            if evento.type == pygame.MOUSEBUTTONDOWN:
+    def handle_events(self, events):
+        for event in events:
+            if event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_pos = pygame.mouse.get_pos()
                 if mouse_pos[0] > 180 and mouse_pos[0] < 435 and mouse_pos[1] > 330 and mouse_pos[1] < 500:
-                    self.selected_city = "Chicago"
-                    return "visualizacion"
+                    self.selected_city = "Barcelona"
+                    return "visualization"
                 elif mouse_pos[0] > 580 and mouse_pos[0] < 835 and mouse_pos[1] > 330 and mouse_pos[1] < 500:
                     self.selected_city = "Madrid"
-                    return "visualizacion"
+                    return "visualization"
         return None
 
-    def dibujar(self, pantalla):
-        pantalla.fill(COLOR_FONDO)
+    def draw(self, screen):
+        screen.fill(GREEN_BACKGROUND)
         
-        pygame.draw.rect(pantalla, VERDE_OSCURO, (0, 0, 1000, 150))
-        self.dibujar_texto(text="SEARCH ALGORITHMS", font=self.title_font, color=BLANCO, pos=(180, 50))
-        self.dibujar_texto(text="Discover the most common search algorithms with a visualization!", font=self.subtitle_font, color=VERDE_BRILLANTE, pos=(165, 210))
-        self.dibujar_texto(text="Pick a city", font=self.subtitle_font, color=VERDE_BRILLANTE, pos=(450, 260))
+        pygame.draw.rect(screen, DARK_GREEN, (0, 0, 1000, 150))
+        self.draw_text(text="SEARCH ALGORITHMS", font=self.title_font, color=WHITE, pos=(180, 50))
+        self.draw_text(text="Discover the most common search algorithms with a visualization!", font=self.subtitle_font, color=LIGHT_GREEN, pos=(165, 210))
+        self.draw_text(text="Pick a city", font=self.subtitle_font, color=LIGHT_GREEN, pos=(450, 260))
 
-        self.dibujar_imagen(path='static/CHICAGO.jpg', shape=(255, 170), pos=(180, 330))
-        self.dibujar_imagen(path='static/MADRID.jpg', shape=(255, 170), pos=(580, 330))
+        self.draw_image(path='static/BARCELONA.jpg', shape=(255, 170), pos=(180, 330))
+        self.draw_image(path='static/MADRID.jpg', shape=(255, 170), pos=(580, 330))
 
-        self.dibujar_texto(text="Chicago", font=self.text_font, color=VERDE_BRILLANTE, pos=(280, 510))
-        self.dibujar_texto(text="Madrid", font=self.text_font, color=VERDE_BRILLANTE, pos=(680, 510))
+        self.draw_text(text="Barcelona", font=self.text_font, color=LIGHT_GREEN, pos=(280, 510))
+        self.draw_text(text="Madrid", font=self.text_font, color=LIGHT_GREEN, pos=(680, 510))
 
-class PantallaVisualizacion(PantallaBase):
+class VisualizationScreen(BaseScreen):
     def __init__(self):
         super().__init__()
         self.algorithm = None
@@ -101,19 +98,19 @@ class PantallaVisualizacion(PantallaBase):
     def set_selected_city(self, city):
         self.selected_city = city
         if city == "Madrid":
-            with open('graphs_data/madrid_edges.pkl', 'rb') as archivo:
-                self.madrid_edges = pickle.load(archivo)
-            with open('graphs_data/madrid_graph.pkl', 'rb') as archivo:
-                self.selected_graph = pickle.load(archivo)
-        elif city == "Chicago":
-            with open('graphs_data/chicago_edges.pkl', 'rb') as archivo:
-                self.chicago_edges = pickle.load(archivo)
-            with open('graphs_data/chicago_graph.pkl', 'rb') as archivo:
-                self.selected_graph = pickle.load(archivo)
+            with open('graphs_data/madrid_edges.pkl', 'rb') as file:
+                self.madrid_edges = pickle.load(file)
+            with open('graphs_data/madrid_graph.pkl', 'rb') as file:
+                self.selected_graph = pickle.load(file)
+        elif city == "Barcelona":
+            with open('graphs_data/barcelona_edges.pkl', 'rb') as file:
+                self.barcelona_edges = pickle.load(file)
+            with open('graphs_data/barcelona_graph.pkl', 'rb') as file:
+                self.selected_graph = pickle.load(file)
 
-    def manejar_eventos(self, eventos):
-        for evento in eventos:
-            if evento.type == pygame.MOUSEBUTTONDOWN:
+    def handle_events(self, events):
+        for event in events:
+            if event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_pos = pygame.mouse.get_pos()
 
                 # Selecting p1
@@ -123,10 +120,10 @@ class PantallaVisualizacion(PantallaBase):
                         self.p1 = cartesian_to_geo(mouse_pos[0] - SHIFT, mouse_pos[1],
                                                    MADRID_LIMITS[1][0], MADRID_LIMITS[1][1],
                                                    MADRID_LIMITS[0][0], MADRID_LIMITS[0][1])
-                    elif self.selected_city == "Chicago":
+                    elif self.selected_city == "Barcelona":
                         self.p1 = cartesian_to_geo(mouse_pos[0] - SHIFT, mouse_pos[1],
-                                                   CHICAGO_LIMITS[1][0], CHICAGO_LIMITS[1][1],
-                                                   CHICAGO_LIMITS[0][0], CHICAGO_LIMITS[0][1])
+                                                   BARCELONA_LIMITS[1][0], BARCELONA_LIMITS[1][1],
+                                                   BARCELONA_LIMITS[0][0], BARCELONA_LIMITS[0][1])
                     self.selecting_p2 = True
                     self.selecting_p1 = False
 
@@ -137,27 +134,27 @@ class PantallaVisualizacion(PantallaBase):
                         self.p2 = cartesian_to_geo(mouse_pos[0] - SHIFT, mouse_pos[1],
                                                    MADRID_LIMITS[1][0], MADRID_LIMITS[1][1],
                                                    MADRID_LIMITS[0][0], MADRID_LIMITS[0][1])
-                    elif self.selected_city == "Chicago":
+                    elif self.selected_city == "Barcelona":
                         self.p2 = cartesian_to_geo(mouse_pos[0] - SHIFT, mouse_pos[1],
-                                                   CHICAGO_LIMITS[1][0], CHICAGO_LIMITS[1][1],
-                                                   CHICAGO_LIMITS[0][0], CHICAGO_LIMITS[0][1])
+                                                   BARCELONA_LIMITS[1][0], BARCELONA_LIMITS[1][1],
+                                                   BARCELONA_LIMITS[0][0], BARCELONA_LIMITS[0][1])
                     self.selecting_p2 = False
 
-                # Botón para aplicar Dijkstra
+                # Button to apply Dijkstra
                 elif mouse_pos[0] > 24 and mouse_pos[0] < 270 and mouse_pos[1] > 247 and mouse_pos[1] < 287:
                     if self.p1 and self.p2:
                         self.algorithm = "Dijkstra"
-                        dist, path, trace = self.calcular_camino()
+                        dist, path, trace = self.calculate_path()
                         self.trace = trace
                         self.path = path
                         self.dist = dist
                         self.path_calculated = True
 
-                # Botón para aplicar A*
+                # Button to apply A*
                 elif mouse_pos[0] > 24 and mouse_pos[0] < 270 and mouse_pos[1] > 297 and mouse_pos[1] < 337:
                     if self.p1 and self.p2:
                         self.algorithm = "A*"
-                        dist, path, trace = self.calcular_camino()
+                        dist, path, trace = self.calculate_path()
                         self.trace = trace
                         self.path = path
                         self.dist = dist
@@ -166,15 +163,16 @@ class PantallaVisualizacion(PantallaBase):
                 # Going back
                 elif mouse_pos[0] > 27 and mouse_pos[0] < 267 and mouse_pos[1] > 530 and mouse_pos[1] < 565:
                     self.p1, self.p2, self.mouse_pos_p1, self.mouse_pos_p2, self.selected_city, self.selected_graph, self.index, self.visited_edges, self.path_calculated, self.search_visualized, self.dist = None, None, None, None, None, None, 0, [], False, None, None
-                    return "inicio"
+                    return "initial"
                 
                 # Selecting points
                 elif mouse_pos[0] > 27 and mouse_pos[0] < 267 and mouse_pos[1] > 51 and mouse_pos[1] < 85:
                     self.p1, self.p2, self.mouse_pos_p1, self.mouse_pos_p2, self.index, self.visited_edges, self.path_calculated, self.search_visualized, self.dist = None, None, None, None, 0, [], False, False, None
                     self.selecting_p1 = True
+
         return None
 
-    def actualizar(self):
+    def update(self):
         # Draw all the search
         if self.path_calculated:
             if self.selected_city == "Madrid":
@@ -183,15 +181,15 @@ class PantallaVisualizacion(PantallaBase):
                                                       MADRID_LIMITS[0][0], MADRID_LIMITS[0][1]) for lon, lat in tr]
                     self.visited_edges.append(t)
                 for edge in self.visited_edges:
-                    pygame.draw.lines(pantalla, color=VERDE_BRILLANTE, closed=True, points=edge, width=2)
+                    pygame.draw.lines(screen, color=LIGHT_GREEN, closed=True, points=edge, width=2)
 
-            elif self.selected_city == "Chicago":
+            elif self.selected_city == "Barcelona":
                 for tr in self.trace[self.index:self.index+10]:
-                    t = [geo_to_cartesian(lon, lat, CHICAGO_LIMITS[1][0], CHICAGO_LIMITS[1][1], 
-                                                      CHICAGO_LIMITS[0][0], CHICAGO_LIMITS[0][1]) for lon, lat in tr]
+                    t = [geo_to_cartesian(lon, lat, BARCELONA_LIMITS[1][0], BARCELONA_LIMITS[1][1], 
+                                                      BARCELONA_LIMITS[0][0], BARCELONA_LIMITS[0][1]) for lon, lat in tr]
                     self.visited_edges.append(t)
                 for edge in self.visited_edges:
-                    pygame.draw.lines(pantalla, color=VERDE_BRILLANTE, closed=True, points=edge, width=2)
+                    pygame.draw.lines(screen, color=LIGHT_GREEN, closed=True, points=edge, width=2)
         
             self.index += 10
             if self.index >= len(self.trace):
@@ -204,59 +202,59 @@ class PantallaVisualizacion(PantallaBase):
             if self.selected_city == "Madrid":
                 path_to_visualize: list[tuple] = transform_final_path(MADRID_LIMITS, self.selected_graph, self.path)
             else:
-                path_to_visualize: list[tuple] = transform_final_path(CHICAGO_LIMITS, self.selected_graph, self.path)
+                path_to_visualize: list[tuple] = transform_final_path(BARCELONA_LIMITS, self.selected_graph, self.path)
             path_to_visualize = [self.mouse_pos_p1] + path_to_visualize + [self.mouse_pos_p2]
-            pygame.draw.lines(pantalla, color=YELLOW, closed=False, points=path_to_visualize, width=2)
+            pygame.draw.lines(screen, color=YELLOW, closed=False, points=path_to_visualize, width=2)
 
         # Draw source node
         if self.p1:
-            pygame.draw.circle(pantalla, ROJO, self.mouse_pos_p1, 3)
-            self.dibujar_texto(text=str((np.round(self.p1[1], 3), np.round(self.p1[0], 3))), font=self.bigger_text_font, color=COLOR_FONDO, pos=(100, 110))
+            pygame.draw.circle(screen, RED, self.mouse_pos_p1, 3)
+            self.draw_text(text=str((np.round(self.p1[1], 3), np.round(self.p1[0], 3))), font=self.bigger_text_font, color=GREEN_BACKGROUND, pos=(100, 110))
         
         # Draw destination node
         if self.p2:
-            pygame.draw.circle(pantalla, ROJO, self.mouse_pos_p2, 3)
-            self.dibujar_texto(text=str((np.round(self.p2[1], 3), np.round(self.p2[0], 3))), font=self.bigger_text_font, color=COLOR_FONDO, pos=(100, 160))
+            pygame.draw.circle(screen, RED, self.mouse_pos_p2, 3)
+            self.draw_text(text=str((np.round(self.p2[1], 3), np.round(self.p2[0], 3))), font=self.bigger_text_font, color=GREEN_BACKGROUND, pos=(100, 160))
 
-    def dibujar_mapa(self):
+    def draw_map(self):
         if self.selected_city == "Madrid":
             edges_to_draw = self.madrid_edges
         else:
-            edges_to_draw = self.chicago_edges
+            edges_to_draw = self.barcelona_edges
 
         for edges in edges_to_draw:
-            pygame.draw.lines(pantalla, color=VERDE_OSCURO, closed=True, points=edges, width=1)
+            pygame.draw.lines(screen, color=DARK_GREEN, closed=True, points=edges, width=1)
 
-    def dibujar(self, pantalla):
-        pantalla.fill(COLOR_FONDO)
+    def draw(self, screen):
+        screen.fill(GREEN_BACKGROUND)
 
-        self.dibujar_mapa()
+        self.draw_map()
 
-        pygame.draw.rect(pantalla, VERDE_OSCURO, (0, 0, 300, 1000))
+        pygame.draw.rect(screen, DARK_GREEN, (0, 0, 300, 1000))
 
-        pygame.draw.rect(pantalla, GRIS, (25, 48, 244, 39))
-        pygame.draw.rect(pantalla, BLANCO, (28, 51, 239, 34))
-        self.dibujar_texto(text="Select points", font=self.bigger_text_font, color=COLOR_FONDO, pos=(90, 60))
+        pygame.draw.rect(screen, GRAY, (25, 48, 244, 39))
+        pygame.draw.rect(screen, WHITE, (28, 51, 239, 34))
+        self.draw_text(text="Select points", font=self.bigger_text_font, color=GREEN_BACKGROUND, pos=(90, 60))
 
-        pygame.draw.rect(pantalla, BLANCO, (27, 100, 240, 35))
-        self.dibujar_texto(text="P1: ", font=self.bigger_text_font, color=COLOR_FONDO, pos=(40, 110))
+        pygame.draw.rect(screen, WHITE, (27, 100, 240, 35))
+        self.draw_text(text="P1: ", font=self.bigger_text_font, color=GREEN_BACKGROUND, pos=(40, 110))
 
-        pygame.draw.rect(pantalla, BLANCO, (27, 150, 240, 35))
-        self.dibujar_texto(text="P2: ", font=self.bigger_text_font, color=COLOR_FONDO, pos=(40, 160))
+        pygame.draw.rect(screen, WHITE, (27, 150, 240, 35))
+        self.draw_text(text="P2: ", font=self.bigger_text_font, color=GREEN_BACKGROUND, pos=(40, 160))
 
-        pygame.draw.rect(pantalla, GRIS, (24, 247, 245, 40))
-        pygame.draw.rect(pantalla, BLANCO, (27, 250, 240, 35))
-        self.dibujar_texto(text="Apply Dijkstra", font=self.bigger_text_font, color=COLOR_FONDO, pos=(90, 260))
+        pygame.draw.rect(screen, GRAY, (24, 247, 245, 40))
+        pygame.draw.rect(screen, WHITE, (27, 250, 240, 35))
+        self.draw_text(text="Apply Dijkstra", font=self.bigger_text_font, color=GREEN_BACKGROUND, pos=(90, 260))
 
-        pygame.draw.rect(pantalla, GRIS, (24, 297, 245, 40))
-        pygame.draw.rect(pantalla, BLANCO, (27, 300, 240, 35))
-        self.dibujar_texto(text="Apply A*", font=self.bigger_text_font, color=COLOR_FONDO, pos=(110, 310))
+        pygame.draw.rect(screen, GRAY, (24, 297, 245, 40))
+        pygame.draw.rect(screen, WHITE, (27, 300, 240, 35))
+        self.draw_text(text="Apply A*", font=self.bigger_text_font, color=GREEN_BACKGROUND, pos=(110, 310))
 
-        pygame.draw.rect(pantalla, GRIS, (24, 527, 245, 40))
-        pygame.draw.rect(pantalla, BLANCO, (27, 530, 240, 35))
-        self.dibujar_texto(text="Back", font=self.bigger_text_font, color=COLOR_FONDO, pos=(127, 540))
+        pygame.draw.rect(screen, GRAY, (24, 527, 245, 40))
+        pygame.draw.rect(screen, WHITE, (27, 530, 240, 35))
+        self.draw_text(text="Back", font=self.bigger_text_font, color=GREEN_BACKGROUND, pos=(127, 540))
     
-    def calcular_camino(self):
+    def calculate_path(self):
         source_node = get_nearest_node(self.selected_graph, self.p1[0], self.p1[1])
 
         destination_node = get_nearest_node(self.selected_graph, self.p2[0], self.p2[1])
@@ -267,61 +265,56 @@ class PantallaVisualizacion(PantallaBase):
             dist, path, trace = a_star(self.selected_graph, source_node, destination_node)
         return dist, path, trace
 
-class ControladorPantallas:
+class ScreenController:
     def __init__(self):
-        self.pantallas = {
-            "inicio": PantallaInicio(),
-            "visualizacion": PantallaVisualizacion()
+        self.screens = {
+            "initial": InitialScreen(),
+            "visualization": VisualizationScreen()
         }
-        self.pantalla_actual = self.pantallas["inicio"] 
+        self.current_screen = self.screens["initial"] 
 
-    def cambiar_pantalla(self, nombre_pantalla):
-        """Cambiar a una pantalla diferente por nombre."""
-        if nombre_pantalla in self.pantallas:
-            if nombre_pantalla == "visualizacion":
-                self.pantallas["visualizacion"].set_selected_city(self.pantallas["inicio"].selected_city)
-            self.pantalla_actual = self.pantallas[nombre_pantalla]
+    def change_screen(self, screen_name):
+        """Change the current screen"""
+        if screen_name in self.screens:
+            if screen_name == "visualization":
+                self.screens["visualization"].set_selected_city(self.screens["initial"].selected_city)
+            self.current_screen = self.screens[screen_name]
 
-    def manejar_eventos(self, eventos):
-        resultado = self.pantalla_actual.manejar_eventos(eventos)
-        if resultado:
-            self.cambiar_pantalla(resultado)
+    def handle_events(self, events):
+        result = self.current_screen.handle_events(events)
+        if result:
+            self.change_screen(result)
 
-    def actualizar(self):
-        self.pantalla_actual.actualizar()
+    def update(self):
+        self.current_screen.update()
 
-    def dibujar(self, pantalla):
-        self.pantalla_actual.dibujar(pantalla)
+    def draw(self, screen):
+        self.current_screen.draw(screen)
 
-# Inicializar pygame
 pygame.init()
 
-# Crear la pantalla del juego
-pantalla = pygame.display.set_mode((1000, 600))
+screen = pygame.display.set_mode((1000, 600))
+screen_controller = ScreenController()
 
-# Inicializar el controlador de pantallas
-controlador_pantallas = ControladorPantallas()
+# Main loop
+running = True
+while running:
+    # Handle events
+    events = pygame.event.get()
+    for event in events:
+        if event.type == pygame.QUIT:
+            running = False
 
-# Bucle principal
-corriendo = True
-while corriendo:
-    # Manejar eventos
-    eventos = pygame.event.get()
-    for evento in eventos:
-        if evento.type == pygame.QUIT:
-            corriendo = False
+    # Handle events in the current screen
+    screen_controller.handle_events(events)
 
-    # Manejar eventos de la pantalla actual
-    controlador_pantallas.manejar_eventos(eventos)
+    # Draw the current screen
+    screen_controller.draw(screen)
 
-    # Dibujar la pantalla actual
-    controlador_pantallas.dibujar(pantalla)
+    # Update the current screen
+    screen_controller.update()
 
-    # Actualizar lógica de la pantalla actual
-    controlador_pantallas.actualizar()
-
-    # Actualizar la pantalla
+    # Update the display
     pygame.display.flip()
 
-# Finalizar pygame
 pygame.quit()

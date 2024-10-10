@@ -1,4 +1,4 @@
-from utils.constants import SCREEN_HEIGHT, SCREEN_WIDTH, SHIFT, MADRID_LIMITS, CHICAGO_LIMITS
+from utils.constants import SCREEN_HEIGHT, SCREEN_WIDTH, SHIFT
 import math
 from graph.graph import Graph, Vertex
 import regex as re

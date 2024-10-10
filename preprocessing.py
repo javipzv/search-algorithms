@@ -2,7 +2,7 @@ import osmnx as ox
 import pickle
 import re
 from graph.graph import Graph, Vertex
-from utils.constants import MADRID_LIMITS, CHICAGO_LIMITS
+from utils.constants import MADRID_LIMITS, BARCELONA_LIMITS
 from utils.helpers import geo_to_cartesian
 
 def load_graph_edges_and_vertices(graph_filepath, lat_min_limit, lat_max_limit, lon_min_limit, lon_max_limit) -> tuple[list, Graph]:
@@ -65,11 +65,11 @@ madrid_edges, madrid_graph = load_graph_edges_and_vertices(
     lon_min_limit=MADRID_LIMITS[0][0], lon_max_limit=MADRID_LIMITS[0][1]
 )
 
-# Process Chicago graph
-chicago_edges, chicago_graph = load_graph_edges_and_vertices(
-    graph_filepath='graph/graph_examples/chicago.graphml',
-    lat_min_limit=CHICAGO_LIMITS[1][0], lat_max_limit=CHICAGO_LIMITS[1][1], 
-    lon_min_limit=CHICAGO_LIMITS[0][0], lon_max_limit=CHICAGO_LIMITS[0][1]
+# Process Barcelona graph
+barcelona_edges, barcelona_graph = load_graph_edges_and_vertices(
+    graph_filepath='graph/graph_examples/barcelona.graphml',
+    lat_min_limit=BARCELONA_LIMITS[1][0], lat_max_limit=BARCELONA_LIMITS[1][1], 
+    lon_min_limit=BARCELONA_LIMITS[0][0], lon_max_limit=BARCELONA_LIMITS[0][1]
 )
 
 # Save the results for Madrid
@@ -79,9 +79,9 @@ with open('graphs_data/madrid_edges.pkl', 'wb') as file:
 with open('graphs_data/madrid_graph.pkl', 'wb') as file:
     pickle.dump(madrid_graph, file)
 
-# Save the results for Chicago
-with open('graphs_data/chicago_edges.pkl', 'wb') as file:
-    pickle.dump(chicago_edges, file)
+# Save the results for Barcelona
+with open('graphs_data/barcelona_edges.pkl', 'wb') as file:
+    pickle.dump(barcelona_edges, file)
 
-with open('graphs_data/chicago_graph.pkl', 'wb') as file:
-    pickle.dump(chicago_graph, file)
+with open('graphs_data/barcelona_graph.pkl', 'wb') as file:
+    pickle.dump(barcelona_graph, file)
