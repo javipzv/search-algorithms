@@ -6,7 +6,6 @@ from functions import cartesian_to_geo, geo_to_cartesian, get_nearest_node
 import numpy as np
 from graph.algorithms.dijkstra import dijkstra
 from graph.algorithms.a_star import a_star
-import time
 
 BLANCO = (255, 255, 255)
 NEGRO = (0, 0, 0)
@@ -79,7 +78,6 @@ class PantallaInicio(PantallaBase):
 class PantallaVisualizacion(PantallaBase):
     def __init__(self):
         super().__init__()
-        self.jugando = True
         self.algorithm = None
         self.mouse_pos_p1 = None
         self.mouse_pos_p2 = None
@@ -96,21 +94,18 @@ class PantallaVisualizacion(PantallaBase):
         self.index = 0
         self.visited_edges = []
 
-        with open('maps/madrid_edges.pkl', 'rb') as archivo:
-            self.madrid_edges = pickle.load(archivo)
-        with open('maps/chicago_edges.pkl', 'rb') as archivo:
-            self.chicago_edges = pickle.load(archivo)
-        with open('maps/madrid_graph.pkl', 'rb') as archivo:
-            self.madrid_graph = pickle.load(archivo)
-        with open('maps/chicago_graph.pkl', 'rb') as archivo:
-            self.chicago_graph = pickle.load(archivo)
-
     def set_selected_city(self, city):
         self.selected_city = city
         if city == "Madrid":
-            self.selected_graph = self.madrid_graph
+            with open('maps/madrid_edges.pkl', 'rb') as archivo:
+                self.madrid_edges = pickle.load(archivo)
+            with open('maps/madrid_graph.pkl', 'rb') as archivo:
+                self.selected_graph = pickle.load(archivo)
         elif city == "Chicago":
-            self.selected_graph = self.chicago_graph
+            with open('maps/chicago_edges.pkl', 'rb') as archivo:
+                self.chicago_edges = pickle.load(archivo)
+            with open('maps/chicago_graph.pkl', 'rb') as archivo:
+                self.selected_graph = pickle.load(archivo)
 
     def manejar_eventos(self, eventos):
         for evento in eventos:
@@ -162,7 +157,7 @@ class PantallaVisualizacion(PantallaBase):
 
                 # Going back
                 elif mouse_pos[0] > 27 and mouse_pos[0] < 267 and mouse_pos[1] > 530 and mouse_pos[1] < 565:
-                    self.p1, self.p2, self.mouse_pos_p1, self.mouse_pos_p2, self.selected_city, self.selected_graph, self.index = None, None, None, None, None, None, 0
+                    self.p1, self.p2, self.mouse_pos_p1, self.mouse_pos_p2, self.selected_city, self.selected_graph, self.index, self.visited_edges, self.path_calculated = None, None, None, None, None, None, 0, [], False
                     return "inicio"
                 
                 # Selecting points
@@ -171,25 +166,13 @@ class PantallaVisualizacion(PantallaBase):
         return None
 
     def actualizar(self):
-        if self.p1:
-            pygame.draw.circle(pantalla, ROJO, self.mouse_pos_p1, 3)
-            self.dibujar_texto(text=str((np.round(self.p1[0], 3), np.round(self.p1[1], 3))), font=self.bigger_text_font, color=COLOR_FONDO, pos=(100, 110))
-
-        if self.p1_nearest:
-            pygame.draw.circle(pantalla, BLANCO, self.p1_nearest, 3)
-        
-        if self.p2:
-            pygame.draw.circle(pantalla, ROJO, self.mouse_pos_p2, 3)
-            self.dibujar_texto(text=str((np.round(self.p2[0], 3), np.round(self.p2[1], 3))), font=self.bigger_text_font, color=COLOR_FONDO, pos=(100, 160))
-        
-        if self.p2_nearest:
-            pygame.draw.circle(pantalla, BLANCO, self.p2_nearest, 3)
-
+        # Draw all the search
         if self.path_calculated:
             if self.selected_city == "Madrid":
-                tr = [geo_to_cartesian(lon, lat, MADRID_LIMITS[1][0], MADRID_LIMITS[1][1], 
-                                                      MADRID_LIMITS[0][0], MADRID_LIMITS[0][1]) for lon, lat in self.trace[self.index]]
-                self.visited_edges.append(tr)
+                for tr in self.trace[self.index:self.index+10]:
+                    t = [geo_to_cartesian(lon, lat, MADRID_LIMITS[1][0], MADRID_LIMITS[1][1], 
+                                                      MADRID_LIMITS[0][0], MADRID_LIMITS[0][1]) for lon, lat in tr]
+                    self.visited_edges.append(t)
                 for edge in self.visited_edges:
                     pygame.draw.lines(pantalla, color=VERDE_BRILLANTE, closed=True, points=edge, width=2)
 
@@ -199,7 +182,24 @@ class PantallaVisualizacion(PantallaBase):
                                                       CHICAGO_LIMITS[0][0], CHICAGO_LIMITS[0][1]) for lon, lat in t]
                     pygame.draw.lines(pantalla, color=VERDE_BRILLANTE, closed=True, points=t_transformed, width=2)
         
-        self.index += 1
+            self.index += 10
+
+        # Draw source node
+        if self.p1:
+            pygame.draw.circle(pantalla, ROJO, self.mouse_pos_p1, 3)
+            self.dibujar_texto(text=str((np.round(self.p1[1], 3), np.round(self.p1[0], 3))), font=self.bigger_text_font, color=COLOR_FONDO, pos=(100, 110))
+
+        # if self.p1_nearest:
+        #     pygame.draw.circle(pantalla, BLANCO, self.p1_nearest, 3)
+        
+        # Draw destination node
+        if self.p2:
+            pygame.draw.circle(pantalla, ROJO, self.mouse_pos_p2, 3)
+            self.dibujar_texto(text=str((np.round(self.p2[1], 3), np.round(self.p2[0], 3))), font=self.bigger_text_font, color=COLOR_FONDO, pos=(100, 160))
+        
+        # if self.p2_nearest:
+        #     pygame.draw.circle(pantalla, BLANCO, self.p2_nearest, 3)
+
 
     def dibujar_mapa(self):
         if self.selected_city == "Madrid":
@@ -253,7 +253,6 @@ class PantallaVisualizacion(PantallaBase):
         if self.algorithm == "Dijkstra":
             dist, path, trace = dijkstra(self.selected_graph, source_node, destination_node)
         elif self.algorithm == "A*":
-            print(source_node, destination_node)
             dist, path, trace = a_star(self.selected_graph, source_node, destination_node)
         return dist, path, trace
 

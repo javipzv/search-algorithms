@@ -25,10 +25,7 @@ def get_nearest_node(graph, lon, lat):
         if dist < min_dist:
             min_dist = dist
             nodo_cercano = v
-    print(min_dist)
     return nodo_cercano
 
 with open('maps/madrid_graph.pkl', 'rb') as archivo:
     madrid_graph = pickle.load(archivo)
-
-print(get_nearest_node(madrid_graph, -3.65694, 40.45007))
