@@ -61,7 +61,11 @@ class InitialScreen(BaseScreen):
         self.selected_city = None
 
     def handle_events(self, events):
+        """
+        Handle the events of the screen
+        """
         for event in events:
+
             # Check if the user clicked on a city
             if event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_pos = pygame.mouse.get_pos()
@@ -78,6 +82,9 @@ class InitialScreen(BaseScreen):
         return None
 
     def draw(self, screen):
+        """
+        Draw the initial screen
+        """
         screen.fill(GREEN_BACKGROUND)
 
         # Draw the title and subtitle
@@ -101,23 +108,24 @@ class VisualizationScreen(BaseScreen):
     def __init__(self):
         super().__init__()
         self.algorithm = None
-        self.mouse_pos_p1 = None
-        self.mouse_pos_p2 = None
-        self.p1 = None
-        self.p2 = None
-        self.selecting_p1 = False
-        self.selecting_p2 = False
+        self.mouse_pos_P1 = None
+        self.mouse_pos_P2 = None
+        self.P1 = None
+        self.P2 = None
+        self.selecting_P1 = False
+        self.selecting_P2 = False
         self.selected_city = None
         self.selected_graph = None
         self.path_calculated = False
         self.trace = None
-        self.p1_nearest = None
-        self.p2_nearest = None
+        self.P1_nearest = None
+        self.P2_nearest = None
         self.index = 0
         self.visited_edges = []
         self.search_visualized = False
         self.path = None
         self.dist = None
+        self.limits = None
 
     def set_selected_city(self, city):
         """
@@ -128,53 +136,48 @@ class VisualizationScreen(BaseScreen):
         # Load the selected city's graph and edges
 
         if city == "Madrid":
+            self.limits = MADRID_LIMITS
             with open('graphs_data/madrid_edges.pkl', 'rb') as file:
                 self.madrid_edges = pickle.load(file)
             with open('graphs_data/madrid_graph.pkl', 'rb') as file:
                 self.selected_graph = pickle.load(file)
 
         elif city == "Barcelona":
+            self.limits = BARCELONA_LIMITS
             with open('graphs_data/barcelona_edges.pkl', 'rb') as file:
                 self.barcelona_edges = pickle.load(file)
             with open('graphs_data/barcelona_graph.pkl', 'rb') as file:
                 self.selected_graph = pickle.load(file)
 
     def handle_events(self, events):
+        """
+        Handle the events of the screen
+        """
         for event in events:
             # Check if the user clicked on the screen
             if event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_pos = pygame.mouse.get_pos()
 
-                # User is selecting p1
-                if self.selecting_p1 and mouse_pos[0] > 300 and mouse_pos[0] < 1000 and mouse_pos[1] > 0 and mouse_pos[1] < 600:
-                    self.mouse_pos_p1 = mouse_pos
-                    if self.selected_city == "Madrid":
-                        self.p1 = cartesian_to_geo(mouse_pos[0] - SHIFT, mouse_pos[1],
-                                                   MADRID_LIMITS[0][0], MADRID_LIMITS[0][1],
-                                                   MADRID_LIMITS[1][0], MADRID_LIMITS[1][1])
-                    elif self.selected_city == "Barcelona":
-                        self.p1 = cartesian_to_geo(mouse_pos[0] - SHIFT, mouse_pos[1],
-                                                   BARCELONA_LIMITS[0][0], BARCELONA_LIMITS[0][1],
-                                                   BARCELONA_LIMITS[1][0], BARCELONA_LIMITS[1][1])
-                    self.selecting_p2 = True
-                    self.selecting_p1 = False
+                # User is selecting P1
+                if self.selecting_P1 and mouse_pos[0] > 300 and mouse_pos[0] < 1000 and mouse_pos[1] > 0 and mouse_pos[1] < 600:
+                    self.mouse_pos_P1 = mouse_pos
+                    self.P1 = cartesian_to_geo(mouse_pos[0] - SHIFT, mouse_pos[1],
+                                                   self.limits[0][0], self.limits[0][1],
+                                                   self.limits[1][0], self.limits[1][1])
+                    self.selecting_P2 = True
+                    self.selecting_P1 = False
 
-                # User is selecting p2
-                elif self.selecting_p2 and mouse_pos[0] > 300 and mouse_pos[0] < 1000 and mouse_pos[1] > 0 and mouse_pos[1] < 600:
-                    self.mouse_pos_p2 = mouse_pos
-                    if self.selected_city == "Madrid":
-                        self.p2 = cartesian_to_geo(mouse_pos[0] - SHIFT, mouse_pos[1],
-                                                   MADRID_LIMITS[0][0], MADRID_LIMITS[0][1],
-                                                   MADRID_LIMITS[1][0], MADRID_LIMITS[1][1])
-                    elif self.selected_city == "Barcelona":
-                        self.p2 = cartesian_to_geo(mouse_pos[0] - SHIFT, mouse_pos[1],
-                                                   BARCELONA_LIMITS[0][0], BARCELONA_LIMITS[0][1],
-                                                   BARCELONA_LIMITS[1][0], BARCELONA_LIMITS[1][1])
-                    self.selecting_p2 = False
+                # User is selecting P2
+                elif self.selecting_P2 and mouse_pos[0] > 300 and mouse_pos[0] < 1000 and mouse_pos[1] > 0 and mouse_pos[1] < 600:
+                    self.mouse_pos_P2 = mouse_pos
+                    self.P2 = cartesian_to_geo(mouse_pos[0] - SHIFT, mouse_pos[1],
+                                                   self.limits[0][0], self.limits[0][1],
+                                                   self.limits[1][0], self.limits[1][1])
+                    self.selecting_P2 = False
 
                 # Button to apply Dijkstra
                 elif mouse_pos[0] > 24 and mouse_pos[0] < 270 and mouse_pos[1] > 247 and mouse_pos[1] < 287:
-                    if self.p1 and self.p2:
+                    if self.P1 and self.P2:
                         self.algorithm = "Dijkstra"
                         dist, path, trace = self.calculate_path()
                         self.trace = trace
@@ -184,7 +187,7 @@ class VisualizationScreen(BaseScreen):
 
                 # Button to apply A*
                 elif mouse_pos[0] > 24 and mouse_pos[0] < 270 and mouse_pos[1] > 297 and mouse_pos[1] < 337:
-                    if self.p1 and self.p2:
+                    if self.P1 and self.P2:
                         self.algorithm = "A*"
                         dist, path, trace = self.calculate_path()
                         self.trace = trace
@@ -194,60 +197,52 @@ class VisualizationScreen(BaseScreen):
 
                 # Going back to the initial screen
                 elif mouse_pos[0] > 27 and mouse_pos[0] < 267 and mouse_pos[1] > 530 and mouse_pos[1] < 565:
-                    self.p1, self.p2, self.mouse_pos_p1, self.mouse_pos_p2, self.selected_city, self.selected_graph, self.index, self.visited_edges, self.path_calculated, self.search_visualized, self.dist = None, None, None, None, None, None, 0, [], False, None, None
+                    self.reset_values()
                     return "initial"
                 
                 # User is going to select points
                 elif mouse_pos[0] > 27 and mouse_pos[0] < 267 and mouse_pos[1] > 51 and mouse_pos[1] < 85:
-                    self.p1, self.p2, self.mouse_pos_p1, self.mouse_pos_p2, self.index, self.visited_edges, self.path_calculated, self.search_visualized, self.dist = None, None, None, None, 0, [], False, False, None
-                    self.selecting_p1 = True
+                    self.reset_points()
+                    self.selecting_P1 = True
 
         return None
 
     def update(self):
-        # Draw all the search
+        """
+        Update the screen
+        """
+        # Draw all the search that has been done by the algorithm
         if self.path_calculated:
-            if self.selected_city == "Madrid":
-                for tr in self.trace[self.index:self.index+10]:
-                    t = [geo_to_cartesian(lat, lon, MADRID_LIMITS[0][0], MADRID_LIMITS[0][1], 
-                                                      MADRID_LIMITS[1][0], MADRID_LIMITS[1][1]) for lat, lon in tr]
-                    self.visited_edges.append(t)
-                for edge in self.visited_edges:
-                    pygame.draw.lines(screen, color=LIGHT_GREEN, closed=True, points=edge, width=2)
+            for trace_segment in self.trace[self.index:self.index+10]:
+                cartesian_points = [geo_to_cartesian(lat, lon, self.limits[0][0], self.limits[0][1], 
+                                                    self.limits[1][0], self.limits[1][1]) for lat, lon in trace_segment]
+                self.visited_edges.append(cartesian_points)
+            for edge in self.visited_edges:
+                pygame.draw.lines(screen, color=LIGHT_GREEN, closed=True, points=edge, width=2)
 
-            elif self.selected_city == "Barcelona":
-                for tr in self.trace[self.index:self.index+10]:
-                    t = [geo_to_cartesian(lat, lon, BARCELONA_LIMITS[0][0], BARCELONA_LIMITS[0][1], 
-                                                      BARCELONA_LIMITS[1][0], BARCELONA_LIMITS[1][1]) for lat, lon in tr]
-                    self.visited_edges.append(t)
-                for edge in self.visited_edges:
-                    pygame.draw.lines(screen, color=LIGHT_GREEN, closed=True, points=edge, width=2)
-
-            # Update the index to visualize the next 5 edges (faster visualization)
-            self.index += 5
+            # Update the index to visualize the next 10 edges (faster visualization)
+            self.index += 10
             if self.index >= len(self.trace):
                 self.index = 0
                 self.path_calculated = False
                 self.search_visualized = True
 
-        # Draw final path after the search
+        # Draw the final path after the search
         if self.search_visualized:
-            if self.selected_city == "Madrid":
-                path_to_visualize: list[tuple] = transform_final_path(MADRID_LIMITS, self.selected_graph, self.path)
-            else:
-                path_to_visualize: list[tuple] = transform_final_path(BARCELONA_LIMITS, self.selected_graph, self.path)
-            path_to_visualize = [self.mouse_pos_p1] + path_to_visualize + [self.mouse_pos_p2]
+            path_to_visualize: list[tuple] = transform_final_path(self.limits, self.selected_graph, self.path)
+            path_to_visualize = [self.mouse_pos_P1] + path_to_visualize + [self.mouse_pos_P2]
             pygame.draw.lines(screen, color=YELLOW, closed=False, points=path_to_visualize, width=2)
+            self.draw_text(text=f"Distance: {np.round(self.dist, 3)} m", font=self.bigger_text_font, color=WHITE, pos=(65, 380))
 
         # Draw source node
-        if self.p1:
-            pygame.draw.circle(screen, RED, self.mouse_pos_p1, 3)
-            self.draw_text(text=str((np.round(self.p1[0], 3), np.round(self.p1[1], 3))), font=self.bigger_text_font, color=GREEN_BACKGROUND, pos=(100, 110))
+        if self.P1:
+            pygame.draw.circle(screen, RED, self.mouse_pos_P1, 3)
+            self.draw_text(text=str((np.round(self.P1[0], 3), np.round(self.P1[1], 3))), font=self.bigger_text_font, color=GREEN_BACKGROUND, pos=(100, 110))
         
         # Draw destination node
-        if self.p2:
-            pygame.draw.circle(screen, RED, self.mouse_pos_p2, 3)
-            self.draw_text(text=str((np.round(self.p2[0], 3), np.round(self.p2[1], 3))), font=self.bigger_text_font, color=GREEN_BACKGROUND, pos=(100, 160))
+        if self.P2:
+            pygame.draw.circle(screen, RED, self.mouse_pos_P2, 3)
+            self.draw_text(text=str((np.round(self.P2[0], 3), np.round(self.P2[1], 3))), font=self.bigger_text_font, color=GREEN_BACKGROUND, pos=(100, 160))
 
     def draw_map(self):
         """
@@ -262,6 +257,9 @@ class VisualizationScreen(BaseScreen):
             pygame.draw.lines(screen, color=DARK_GREEN, closed=True, points=edges, width=1)
 
     def draw(self, screen):
+        """
+        Draw the visualization screen
+        """
         screen.fill(GREEN_BACKGROUND)
 
         self.draw_map()
@@ -298,16 +296,33 @@ class VisualizationScreen(BaseScreen):
         """
         Calculate the path using the selected algorithm
         """
+        source_node: Vertex = get_nearest_node(self.selected_graph, self.P1[0], self.P1[1])
 
-        source_node: Vertex = get_nearest_node(self.selected_graph, self.p1[0], self.p1[1])
-
-        destination_node: Vertex = get_nearest_node(self.selected_graph, self.p2[0], self.p2[1])
+        destination_node: Vertex = get_nearest_node(self.selected_graph, self.P2[0], self.P2[1])
         
         if self.algorithm == "Dijkstra":
             dist, path, trace = dijkstra(self.selected_graph, source_node, destination_node)
         elif self.algorithm == "A*":
             dist, path, trace = a_star(self.selected_graph, source_node, destination_node)
         return dist, path, trace
+    
+    def reset_values(self):
+        """
+        Reset the values of the screen
+        """
+        self.P1, self.P2, self.mouse_pos_P1, self.mouse_pos_P2, self.selected_city, self.selected_graph, self.dist, self.limits = None, None, None, None, None, None, None, None
+        self.visited_edges = []
+        self.index = 0
+        self.path_calculated, self.search_visualized = False, False
+
+    def reset_points(self):
+        """
+        Reset the points selected by the user
+        """
+        self.P1, self.P2, self.mouse_pos_P1, self.mouse_pos_P2, self.dist = None, None, None, None, None
+        self.visited_edges = []
+        self.index = 0
+        self.path_calculated, self.search_visualized = False, False
 
 class ScreenController:
     def __init__(self):
@@ -327,14 +342,23 @@ class ScreenController:
             self.current_screen = self.screens[screen_name]
 
     def handle_events(self, events):
+        """
+        Handle the events of the current screen
+        """
         result = self.current_screen.handle_events(events)
         if result:
             self.change_screen(result)
 
     def update(self):
+        """
+        Update the current screen
+        """
         self.current_screen.update()
 
     def draw(self, screen):
+        """
+        Draw the current screen
+        """
         self.current_screen.draw(screen)
 
 # Initialize the screen and the screen controller
