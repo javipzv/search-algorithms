@@ -1,6 +1,6 @@
 from utils.constants import SCREEN_HEIGHT, SCREEN_WIDTH, SHIFT
 import math
-import pickle
+from graph.graph import Vertex
 
 def cartesian_to_geo(x, y, min_lat, max_lat, min_lon, max_lon):
     lon = -(-min_lon + ((min_lon - max_lon) * x / SCREEN_WIDTH))
@@ -26,3 +26,16 @@ def get_nearest_node(graph, lon, lat):
             min_dist = dist
             nodo_cercano = v
     return nodo_cercano
+
+def redo_path(destination: Vertex, parent_dict: dict):
+    """
+    Redo the path from the destination to the source
+    """
+    path = [destination]
+    child = destination
+    parent = parent_dict[child]
+    while parent:
+        path.append(parent)
+        child = parent
+        parent = parent_dict[child]
+    return path[::-1]
