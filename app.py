@@ -96,6 +96,7 @@ class PantallaVisualizacion(PantallaBase):
         self.visited_edges = []
         self.search_visualized = False
         self.path = None
+        self.dist = None
 
     def set_selected_city(self, city):
         self.selected_city = city
@@ -123,7 +124,7 @@ class PantallaVisualizacion(PantallaBase):
                                                    MADRID_LIMITS[1][0], MADRID_LIMITS[1][1],
                                                    MADRID_LIMITS[0][0], MADRID_LIMITS[0][1])
                     elif self.selected_city == "Chicago":
-                        self.p1 = cartesian_to_geo(mouse_pos[0], mouse_pos[1],
+                        self.p1 = cartesian_to_geo(mouse_pos[0] - SHIFT, mouse_pos[1],
                                                    CHICAGO_LIMITS[1][0], CHICAGO_LIMITS[1][1],
                                                    CHICAGO_LIMITS[0][0], CHICAGO_LIMITS[0][1])
                     self.selecting_p2 = True
@@ -137,7 +138,7 @@ class PantallaVisualizacion(PantallaBase):
                                                    MADRID_LIMITS[1][0], MADRID_LIMITS[1][1],
                                                    MADRID_LIMITS[0][0], MADRID_LIMITS[0][1])
                     elif self.selected_city == "Chicago":
-                        self.p2 = cartesian_to_geo(mouse_pos[0], mouse_pos[1],
+                        self.p2 = cartesian_to_geo(mouse_pos[0] - SHIFT, mouse_pos[1],
                                                    CHICAGO_LIMITS[1][0], CHICAGO_LIMITS[1][1],
                                                    CHICAGO_LIMITS[0][0], CHICAGO_LIMITS[0][1])
                     self.selecting_p2 = False
@@ -149,6 +150,7 @@ class PantallaVisualizacion(PantallaBase):
                         dist, path, trace = self.calcular_camino()
                         self.trace = trace
                         self.path = path
+                        self.dist = dist
                         self.path_calculated = True
 
                 # Botón para aplicar A*
@@ -158,15 +160,17 @@ class PantallaVisualizacion(PantallaBase):
                         dist, path, trace = self.calcular_camino()
                         self.trace = trace
                         self.path = path
+                        self.dist = dist
                         self.path_calculated = True
 
                 # Going back
                 elif mouse_pos[0] > 27 and mouse_pos[0] < 267 and mouse_pos[1] > 530 and mouse_pos[1] < 565:
-                    self.p1, self.p2, self.mouse_pos_p1, self.mouse_pos_p2, self.selected_city, self.selected_graph, self.index, self.visited_edges, self.path_calculated, self.search_visualized = None, None, None, None, None, None, 0, [], False, None
+                    self.p1, self.p2, self.mouse_pos_p1, self.mouse_pos_p2, self.selected_city, self.selected_graph, self.index, self.visited_edges, self.path_calculated, self.search_visualized, self.dist = None, None, None, None, None, None, 0, [], False, None, None
                     return "inicio"
                 
                 # Selecting points
                 elif mouse_pos[0] > 27 and mouse_pos[0] < 267 and mouse_pos[1] > 51 and mouse_pos[1] < 85:
+                    self.p1, self.p2, self.mouse_pos_p1, self.mouse_pos_p2, self.index, self.visited_edges, self.path_calculated, self.search_visualized, self.dist = None, None, None, None, 0, [], False, False, None
                     self.selecting_p1 = True
         return None
 
@@ -182,10 +186,12 @@ class PantallaVisualizacion(PantallaBase):
                     pygame.draw.lines(pantalla, color=VERDE_BRILLANTE, closed=True, points=edge, width=2)
 
             elif self.selected_city == "Chicago":
-                for t in self.trace:
-                    t_transformed = [geo_to_cartesian(lon, lat, CHICAGO_LIMITS[1][0], CHICAGO_LIMITS[1][1], 
-                                                      CHICAGO_LIMITS[0][0], CHICAGO_LIMITS[0][1]) for lon, lat in t]
-                    pygame.draw.lines(pantalla, color=VERDE_BRILLANTE, closed=True, points=t_transformed, width=2)
+                for tr in self.trace[self.index:self.index+10]:
+                    t = [geo_to_cartesian(lon, lat, CHICAGO_LIMITS[1][0], CHICAGO_LIMITS[1][1], 
+                                                      CHICAGO_LIMITS[0][0], CHICAGO_LIMITS[0][1]) for lon, lat in tr]
+                    self.visited_edges.append(t)
+                for edge in self.visited_edges:
+                    pygame.draw.lines(pantalla, color=VERDE_BRILLANTE, closed=True, points=edge, width=2)
         
             self.index += 10
             if self.index >= len(self.trace):
@@ -195,7 +201,10 @@ class PantallaVisualizacion(PantallaBase):
 
         # Draw final path
         if self.search_visualized:
-            path_to_visualize: list[tuple] = transform_final_path(MADRID_LIMITS, self.selected_graph, self.path)
+            if self.selected_city == "Madrid":
+                path_to_visualize: list[tuple] = transform_final_path(MADRID_LIMITS, self.selected_graph, self.path)
+            else:
+                path_to_visualize: list[tuple] = transform_final_path(CHICAGO_LIMITS, self.selected_graph, self.path)
             path_to_visualize = [self.mouse_pos_p1] + path_to_visualize + [self.mouse_pos_p2]
             pygame.draw.lines(pantalla, color=YELLOW, closed=False, points=path_to_visualize, width=2)
 
