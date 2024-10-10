@@ -8,9 +8,9 @@ This project includes an interactive visualization application for two of the mo
 - Interactive: Select start and end points manually on the map.
 
 ### Running the project
-Clone the repository.
-Install the dependencies.
-Run app.py.
+- Clone the repository.
+- Install the dependencies.
+- Run app.py.
 
 ### Example
 
