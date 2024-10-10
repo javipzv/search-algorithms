@@ -2,7 +2,7 @@ import pygame
 from PIL import Image
 import pickle
 from utils.constants import MADRID_LIMITS, CHICAGO_LIMITS, SHIFT
-from utils.helpers import cartesian_to_geo, geo_to_cartesian, get_nearest_node
+from utils.helpers import cartesian_to_geo, geo_to_cartesian, get_nearest_node, transform_final_path
 import numpy as np
 from graph.algorithms.dijkstra import dijkstra
 from graph.algorithms.a_star import a_star
@@ -14,6 +14,7 @@ VERDE_OSCURO = (65, 84, 85)
 VERDE_BRILLANTE = (131, 179, 185)
 GRIS = (150, 150, 150)
 ROJO = (255, 0, 0)
+YELLOW = (255, 219, 77)
 
 class PantallaBase:
     def __init__(self):
@@ -36,7 +37,7 @@ class PantallaBase:
 
     def dibujar_imagen(self, path, shape, pos):
         img = Image.open(path)
-        img_redim = img.resize(shape, Image.ANTIALIAS)
+        img_redim = img.resize(shape, Image.Resampling.LANCZOS)
         img_redim_pg = pygame.image.fromstring(img_redim.tobytes(), img_redim.size, img_redim.mode)
         pantalla.blit(img_redim_pg, pos)
 
@@ -93,6 +94,8 @@ class PantallaVisualizacion(PantallaBase):
         self.p2_nearest = None
         self.index = 0
         self.visited_edges = []
+        self.search_visualized = False
+        self.path = None
 
     def set_selected_city(self, city):
         self.selected_city = city
@@ -145,6 +148,7 @@ class PantallaVisualizacion(PantallaBase):
                         self.algorithm = "Dijkstra"
                         dist, path, trace = self.calcular_camino()
                         self.trace = trace
+                        self.path = path
                         self.path_calculated = True
 
                 # Botón para aplicar A*
@@ -153,11 +157,12 @@ class PantallaVisualizacion(PantallaBase):
                         self.algorithm = "A*"
                         dist, path, trace = self.calcular_camino()
                         self.trace = trace
+                        self.path = path
                         self.path_calculated = True
 
                 # Going back
                 elif mouse_pos[0] > 27 and mouse_pos[0] < 267 and mouse_pos[1] > 530 and mouse_pos[1] < 565:
-                    self.p1, self.p2, self.mouse_pos_p1, self.mouse_pos_p2, self.selected_city, self.selected_graph, self.index, self.visited_edges, self.path_calculated = None, None, None, None, None, None, 0, [], False
+                    self.p1, self.p2, self.mouse_pos_p1, self.mouse_pos_p2, self.selected_city, self.selected_graph, self.index, self.visited_edges, self.path_calculated, self.search_visualized = None, None, None, None, None, None, 0, [], False, None
                     return "inicio"
                 
                 # Selecting points
@@ -183,23 +188,26 @@ class PantallaVisualizacion(PantallaBase):
                     pygame.draw.lines(pantalla, color=VERDE_BRILLANTE, closed=True, points=t_transformed, width=2)
         
             self.index += 10
+            if self.index >= len(self.trace):
+                self.index = 0
+                self.path_calculated = False
+                self.search_visualized = True
+
+        # Draw final path
+        if self.search_visualized:
+            path_to_visualize: list[tuple] = transform_final_path(MADRID_LIMITS, self.selected_graph, self.path)
+            path_to_visualize = [self.mouse_pos_p1] + path_to_visualize + [self.mouse_pos_p2]
+            pygame.draw.lines(pantalla, color=YELLOW, closed=False, points=path_to_visualize, width=2)
 
         # Draw source node
         if self.p1:
             pygame.draw.circle(pantalla, ROJO, self.mouse_pos_p1, 3)
             self.dibujar_texto(text=str((np.round(self.p1[1], 3), np.round(self.p1[0], 3))), font=self.bigger_text_font, color=COLOR_FONDO, pos=(100, 110))
-
-        # if self.p1_nearest:
-        #     pygame.draw.circle(pantalla, BLANCO, self.p1_nearest, 3)
         
         # Draw destination node
         if self.p2:
             pygame.draw.circle(pantalla, ROJO, self.mouse_pos_p2, 3)
             self.dibujar_texto(text=str((np.round(self.p2[1], 3), np.round(self.p2[0], 3))), font=self.bigger_text_font, color=COLOR_FONDO, pos=(100, 160))
-        
-        # if self.p2_nearest:
-        #     pygame.draw.circle(pantalla, BLANCO, self.p2_nearest, 3)
-
 
     def dibujar_mapa(self):
         if self.selected_city == "Madrid":
@@ -241,14 +249,8 @@ class PantallaVisualizacion(PantallaBase):
     
     def calcular_camino(self):
         source_node = get_nearest_node(self.selected_graph, self.p1[0], self.p1[1])
-        # source_node_cart = geo_to_cartesian(source_node.longitude, source_node.latitude, MADRID_LIMITS[1][0], MADRID_LIMITS[1][1], 
-        #                                     MADRID_LIMITS[0][0], MADRID_LIMITS[0][1])
-        # self.p1_nearest = source_node_cart
 
         destination_node = get_nearest_node(self.selected_graph, self.p2[0], self.p2[1])
-        # destination_node_cart = geo_to_cartesian(destination_node.longitude, destination_node.latitude, MADRID_LIMITS[1][0], MADRID_LIMITS[1][1], 
-        #                                     MADRID_LIMITS[0][0], MADRID_LIMITS[0][1])
-        # self.p2_nearest = destination_node_cart
         
         if self.algorithm == "Dijkstra":
             dist, path, trace = dijkstra(self.selected_graph, source_node, destination_node)
