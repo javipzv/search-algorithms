@@ -14,6 +14,6 @@ This project includes an interactive visualization application for two of the mo
 
 ### Example
 
-
+![image](https://github.com/user-attachments/assets/aa4601c7-1f1f-46f0-844e-14914c0426b2)
 
 ### Link to a video
