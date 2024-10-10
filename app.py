@@ -70,7 +70,7 @@ class InitialScreen(BaseScreen):
         self.draw_image(path='static/BARCELONA.jpg', shape=(255, 170), pos=(180, 330))
         self.draw_image(path='static/MADRID.jpg', shape=(255, 170), pos=(580, 330))
 
-        self.draw_text(text="Barcelona", font=self.text_font, color=LIGHT_GREEN, pos=(280, 510))
+        self.draw_text(text="Barcelona", font=self.text_font, color=LIGHT_GREEN, pos=(270, 510))
         self.draw_text(text="Madrid", font=self.text_font, color=LIGHT_GREEN, pos=(680, 510))
 
 class VisualizationScreen(BaseScreen):
