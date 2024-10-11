@@ -20,3 +20,4 @@ This project includes an interactive visualization application for two of the mo
 </div>
 
 ### Link to a video
+https://youtu.be/FvkE7NnYjO8
