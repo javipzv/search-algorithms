@@ -363,6 +363,8 @@ class ScreenController:
 
 # Initialize the screen and the screen controller
 pygame.init()
+pygame.display.set_caption("Search Algorithms Visualization")
+pygame.display.set_icon(pygame.image.load('static/LOCATION.png'))
 screen = pygame.display.set_mode((1000, 600))
 screen_controller = ScreenController()
 
