@@ -15,9 +15,9 @@ This project includes an interactive visualization application for two of the mo
 ### Example
 
 <div style="display: flex; align-items: center; justify-content: center;">
-    <img src="https://github.com/user-attachments/assets/aa4601c7-1f1f-46f0-844e-14914c0426b2" alt="First Image" style="width: 100px; margin-right: 10px;">
-    <img src="arrow_image_url" alt="Arrow Image" style="width: 30px; margin: 0 10px;">
-    <img src="https://github.com/user-attachments/assets/74cc871e-782e-490a-b46a-50d1ba67115c" alt="Second Image" style="width: 100px; margin-left: 10px;">
+    <img src="https://github.com/user-attachments/assets/aa4601c7-1f1f-46f0-844e-14914c0426b2" alt="First Image" style="width: 400px; margin-right: 10px;">
+    <img src="https://github.com/user-attachments/assets/90379ff0-0abb-40cb-b90a-ab661ce29125" alt="Arrow Image" style="width: 100px; margin: 0 10px;">
+    <img src="https://github.com/user-attachments/assets/74cc871e-782e-490a-b46a-50d1ba67115c" alt="Second Image" style="width: 400px; margin-left: 10px;">
 </div>
 
 ### Link to a video
