@@ -176,7 +176,7 @@ class VisualizationScreen(BaseScreen):
                     self.selecting_P2 = False
 
                 # Button to apply Dijkstra
-                elif mouse_pos[0] > 24 and mouse_pos[0] < 270 and mouse_pos[1] > 247 and mouse_pos[1] < 287:
+                elif mouse_pos[0] > 24 and mouse_pos[0] < 270 and mouse_pos[1] > 247 and mouse_pos[1] < 287 and not self.search_visualized:
                     if self.P1 and self.P2:
                         self.algorithm = "Dijkstra"
                         dist, path, trace = self.calculate_path()
@@ -186,7 +186,7 @@ class VisualizationScreen(BaseScreen):
                         self.path_calculated = True
 
                 # Button to apply A*
-                elif mouse_pos[0] > 24 and mouse_pos[0] < 270 and mouse_pos[1] > 297 and mouse_pos[1] < 337:
+                elif mouse_pos[0] > 24 and mouse_pos[0] < 270 and mouse_pos[1] > 297 and mouse_pos[1] < 337 and not self.search_visualized:
                     if self.P1 and self.P2:
                         self.algorithm = "A*"
                         dist, path, trace = self.calculate_path()
